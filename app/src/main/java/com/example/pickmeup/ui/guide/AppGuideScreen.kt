@@ -106,7 +106,7 @@ fun AppGuideScreen(
                     )
                     Text(
                         text = stringResource(R.string.guide_title),
-                        style = astaStyle(44.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 60f / 44f),
+                        style = astaStyle(44.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 44f),
                     )
                 }
 
@@ -430,11 +430,11 @@ private fun MockAllowedCard() {
     ) {
         Text(
             text = stringResource(R.string.guide_step3_card_title),
-            style = astaStyle(36.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 80f / 36f),
+            style = astaStyle(36.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 44f / 36f),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
-        // 본문 618px: 주소는 위쪽(top 189.8px), 질문은 아래쪽(top 546px)
+        // 본문 654px: 주소는 top 207.8px, 질문은 top 582px (Figma 2-3-2 기준)
         Box(
             Modifier
                 .fillMaxWidth()
@@ -442,19 +442,19 @@ private fun MockAllowedCard() {
         ) {
             Text(
                 text = stringResource(R.string.guide_step3_card_location),
-                style = astaStyle(48.pxSp, FontWeight.ExtraBold, PickMeUpColors.TextPrimary),
+                style = astaStyle(48.pxSp, FontWeight.ExtraBold, PickMeUpColors.TextPrimary, 64f / 48f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 189.8.px),
+                    .padding(top = 207.8.px),
             )
             Text(
                 text = stringResource(R.string.guide_step3_card_question),
-                style = astaStyle(30.pxSp, FontWeight.Normal, PickMeUpColors.TextPrimary),
+                style = astaStyle(30.pxSp, FontWeight.Normal, PickMeUpColors.TextPrimary, 38f / 30f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 546.px),
+                    .padding(top = 582.px),
             )
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(40.px)) {
@@ -469,7 +469,7 @@ private fun MockPurpleButton(@StringRes text: Int, modifier: Modifier) {
     Box(
         modifier
             .height(100.px)
-            .clip(RoundedCornerShape(16.px))
+            .clip(RoundedCornerShape(32.px))
             .background(Purple),
         contentAlignment = Alignment.Center,
     ) {
@@ -477,7 +477,7 @@ private fun MockPurpleButton(@StringRes text: Int, modifier: Modifier) {
         // 패딩을 두면 글자가 잘리므로 버튼 전체 폭 기준으로 가운데 정렬만 합니다.
         Text(
             text = stringResource(text),
-            style = astaStyle(32.pxSp, FontWeight.Bold, Color.White, 44f / 32f),
+            style = astaStyle(32.pxSp, FontWeight.Bold, Color.White, 40f / 32f),
             softWrap = false,
         )
     }
