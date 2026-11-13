@@ -3,6 +3,7 @@ package com.example.pickmeup.ui.location
 import androidx.lifecycle.SavedStateHandle
 import com.example.pickmeup.MainDispatcherRule
 import com.example.pickmeup.data.pickup.FakePickupRepository
+import com.example.pickmeup.data.target.FakePickupTargetRepository
 import com.example.pickmeup.model.LocationShareResult
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -19,8 +20,9 @@ class LocationRequestViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = FakePickupRepository()
+    private val targetRepository = FakePickupTargetRepository()
     // lazy: MainDispatcherRule 이 Main 을 바꾼 뒤에 생성
-    private val vm by lazy { LocationRequestViewModel(SavedStateHandle(), repository) }
+    private val vm by lazy { LocationRequestViewModel(SavedStateHandle(), repository, targetRepository) }
 
     @Test
     fun selectedTargetArgs_prefillInputs() {
@@ -28,6 +30,7 @@ class LocationRequestViewModelTest {
         val prefilled = LocationRequestViewModel(
             SavedStateHandle(mapOf("name" to "김민수", "phoneDigits" to "01012345678")),
             repository,
+            targetRepository,
         )
 
         assertEquals("김민수", prefilled.uiState.value.name)
@@ -76,5 +79,28 @@ class LocationRequestViewModelTest {
         assertEquals(LocationRequestEvent.ResponseReceived, vm.events.first())
         val share = repository.currentShare.value as LocationShareResult.Allowed
         assertEquals("홍길동", share.targetName)
+    }
+
+    @Test
+    fun saveChecked_savesTargetAfterSuccessfulRequest() = runTest {
+        vm.onNameChange("홍길동")
+        vm.onPhoneChange("01012345678")
+        vm.onSaveForNextChange(true)
+
+        vm.requestLocation()
+
+        assertEquals(LocationRequestEvent.ResponseReceived, vm.events.first())
+        assertEquals(listOf("홍길동"), targetRepository.stored.map { it.name })
+    }
+
+    @Test
+    fun saveUnchecked_doesNotSaveTarget() = runTest {
+        vm.onNameChange("홍길동")
+        vm.onPhoneChange("01012345678")
+
+        vm.requestLocation()
+
+        assertEquals(LocationRequestEvent.ResponseReceived, vm.events.first())
+        assertTrue(targetRepository.stored.isEmpty())
     }
 }
