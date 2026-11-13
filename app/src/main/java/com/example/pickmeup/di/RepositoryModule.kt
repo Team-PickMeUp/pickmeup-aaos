@@ -4,6 +4,8 @@ import com.example.pickmeup.BuildConfig
 import com.example.pickmeup.data.pickup.FakePickupRepository
 import com.example.pickmeup.data.pickup.PickupRepository
 import com.example.pickmeup.data.pickup.RemotePickupRepository
+import com.example.pickmeup.data.target.LocalPickupTargetRepository
+import com.example.pickmeup.data.target.PickupTargetRepository
 import com.example.pickmeup.data.terms.LocalTermsConsentRepository
 import com.example.pickmeup.data.terms.TermsConsentRepository
 import dagger.Binds
@@ -20,6 +22,9 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindTermsConsentRepository(impl: LocalTermsConsentRepository): TermsConsentRepository
+
+    @Binds
+    abstract fun bindPickupTargetRepository(impl: LocalPickupTargetRepository): PickupTargetRepository
 
     companion object {
         /** 서버 준비 전에는 가짜 저장소 사용 (app/build.gradle.kts 의 USE_FAKE_API 참고) */
