@@ -1,8 +1,8 @@
 package com.example.pickmeup.ui.share
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.pickmeup.MainDispatcherRule
 import com.example.pickmeup.data.pickup.FakePickupRepository
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -17,32 +17,55 @@ class PickupInProgressViewModelTest {
 
     private val repository = FakePickupRepository()
 
+    private fun viewModel(handle: SavedStateHandle = SavedStateHandle()) =
+        PickupInProgressViewModel(handle, repository)
+
     @Test
     fun withoutActivePickup_locationIsNull() {
-        assertNull(PickupInProgressViewModel(repository).location)
+        assertNull(viewModel().location)
     }
 
     @Test
-    fun complete_clearsPickup_butScreenKeepsLocation() = runTest {
+    fun complete_showsCompletedResult_butScreenKeepsLocation() = runTest {
         repository.requestLocationShare("홍길동", "01012345678")
-        val vm = PickupInProgressViewModel(repository)
+        val vm = viewModel()
 
         vm.completePickup()
 
-        assertEquals(Unit, vm.finished.first())
+        assertEquals(PickupResult.Completed, vm.result.value)
         assertNull(repository.currentShare.value)
-        // 종료 이벤트로 화면이 닫히기 전에 '데이터 없음' 처리(뒤로 가기)가 일어나지 않아야 함
+        // 결과 팝업 뒤에 픽업 화면이 그대로 있어야 함 ('데이터 없음'으로 뒤로 가지 않음)
         assertNotNull(vm.location)
     }
 
     @Test
-    fun cancel_clearsPickupAndFinishes() = runTest {
+    fun cancel_showsCancelledResult() = runTest {
         repository.requestLocationShare("홍길동", "01012345678")
-        val vm = PickupInProgressViewModel(repository)
+        val vm = viewModel()
 
         vm.cancelPickup()
 
-        assertEquals(Unit, vm.finished.first())
+        assertEquals(PickupResult.Cancelled, vm.result.value)
         assertNull(repository.currentShare.value)
+    }
+
+    @Test
+    fun afterResult_otherButtonIsIgnored() = runTest {
+        repository.requestLocationShare("홍길동", "01012345678")
+        val vm = viewModel()
+
+        vm.completePickup()
+        vm.cancelPickup()
+
+        assertEquals(PickupResult.Completed, vm.result.value)
+    }
+
+    @Test
+    fun result_survivesRecreation() = runTest {
+        repository.requestLocationShare("홍길동", "01012345678")
+        val handle = SavedStateHandle()
+        viewModel(handle).cancelPickup()
+
+        assertEquals(PickupResult.Cancelled, viewModel(handle).result.value)
     }
 }
