@@ -10,7 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.minutes
@@ -40,14 +40,15 @@ class RemotePickupRepository @Inject constructor(
         val created = api.createLocationRequest(CreateLocationRequestBody(targetName, phoneNumber))
         currentRequestId = created.id
 
-        val answered = withTimeout(RESPONSE_TIMEOUT) {
+        // withTimeout 은 시간 초과를 '취소'로 던져서 runSuspendCatching 이 실패로 잡지 못함 → OrNull 사용
+        val answered = withTimeoutOrNull(RESPONSE_TIMEOUT) {
             var response = created
             while (response.status == LocationRequestStatus.PENDING) {
                 delay(POLL_INTERVAL)
                 response = api.getLocationRequest(created.id)
             }
             response
-        }
+        } ?: throw ResponseTimeoutException()
         answered.toShareResult().also { _currentShare.value = it }
     }
 
@@ -81,3 +82,6 @@ class RemotePickupRepository @Inject constructor(
         val RESPONSE_TIMEOUT = 5.minutes
     }
 }
+
+/** 대상자가 정해진 시간 안에 응답하지 않음 */
+class ResponseTimeoutException : Exception("픽업 대상자 응답 시간 초과")
