@@ -2,7 +2,14 @@ package com.example.pickmeup.ui.share
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.pickmeup.MainDispatcherRule
+import com.example.pickmeup.data.message.FakePickupMessageRepository
 import com.example.pickmeup.data.pickup.FakePickupRepository
+import com.example.pickmeup.model.PickupMessage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -10,7 +17,9 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PickupInProgressViewModelTest {
 
     @get:Rule
@@ -19,7 +28,7 @@ class PickupInProgressViewModelTest {
     private val repository = FakePickupRepository(responseDelay = Duration.ZERO)
 
     private fun viewModel(handle: SavedStateHandle = SavedStateHandle()) =
-        PickupInProgressViewModel(handle, repository)
+        PickupInProgressViewModel(handle, repository, FakePickupMessageRepository(interval = 2.seconds))
 
     @Test
     fun withoutActivePickup_locationIsNull() {
@@ -68,5 +77,20 @@ class PickupInProgressViewModelTest {
         viewModel(handle).cancelPickup()
 
         assertEquals(PickupResult.Cancelled, viewModel(handle).result.value)
+    }
+
+    @Test
+    fun messages_cycleEveryTwoSeconds() = runTest {
+        val vm = viewModel()
+        // 화면 구독 흉내 (WhileSubscribed)
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.message.collect {} }
+
+        assertEquals(PickupMessage.GoingToPlace, vm.message.value)
+        advanceTimeBy(2.seconds); runCurrent()
+        assertEquals(PickupMessage.AlmostArrived, vm.message.value)
+        advanceTimeBy(2.seconds); runCurrent()
+        assertEquals(PickupMessage.Waiting, vm.message.value)
+        advanceTimeBy(2.seconds); runCurrent()
+        assertEquals(PickupMessage.GoingToPlace, vm.message.value) // 처음부터 반복
     }
 }
