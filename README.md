@@ -16,6 +16,42 @@
 | 플랫폼 | Android Automotive OS, minSdk 34 / targetSdk 37 |
 | 디자인 | [Figma 와이어프레임](https://www.figma.com/design/ViO6HZxZ5M1Vc2ulAEdzDF) |
 
+## 라이브러리
+
+버전은 모두 [`gradle/libs.versions.toml`](gradle/libs.versions.toml)에서 관리합니다. 라이브러리를 추가할 때도 이 파일에 등록하고 아래 표를 같이 갱신해주세요.
+
+| 구분 | 라이브러리 | 버전 | 용도 |
+|---|---|---|---|
+| UI | Jetpack Compose BOM | 2026.02.01 | Compose 라이브러리 버전 일괄 관리 |
+| | Compose Material3 | (BOM) | Material 컴포넌트, 테마 |
+| | Activity Compose | 1.13.0 | `setContent`로 Compose 화면 표시 |
+| 아키텍처 | Lifecycle ViewModel Compose | 2.11.0 | ViewModel, `SavedStateHandle` |
+| | Lifecycle Runtime Compose | 2.11.0 | `collectAsStateWithLifecycle` (화면이 보일 때만 상태 구독) |
+| 화면 이동 | Navigation Compose | 2.10.2 | 화면 이동, type-safe route |
+| DI | Hilt (Dagger) | 2.60.1 | 의존성 주입 |
+| | Hilt Lifecycle ViewModel Compose | 1.4.0 | Compose에서 `hiltViewModel()` |
+| 네트워크 | Retrofit | 3.0.0 | REST API 호출 |
+| | Retrofit kotlinx.serialization Converter | 3.0.0 | JSON ↔ Kotlin 객체 변환 연결 |
+| | OkHttp Logging Interceptor | 5.5.1 | debug 빌드에서 요청/응답 로그 |
+| | kotlinx.serialization JSON | 1.11.0 | JSON 직렬화, Navigation 경로 직렬화 |
+| 테스트 | JUnit 4 | 4.13.2 | 단위 테스트 |
+| | kotlinx-coroutines-test | 1.11.0 | ViewModel(코루틴) 테스트 |
+
+| 빌드 플러그인 | 버전 | 용도 |
+|---|---|---|
+| Android Gradle Plugin | 9.5.1 | 안드로이드 빌드 |
+| Kotlin Compose / Serialization | 2.2.10 | Compose 컴파일러, `@Serializable` |
+| KSP | 2.3.13 | Hilt 코드 생성 |
+| Hilt Gradle Plugin | 2.60.1 | Hilt 설정 |
+
+> kotlinx.serialization 1.12 이상은 Kotlin 2.4가 필요해서 1.11.0을 씁니다. Kotlin을 올릴 때 같이 올려주세요.
+
+### 리소스
+
+| 이름 | 용도 |
+|---|---|
+| Asta Sans (`res/font/asta_sans.ttf`) | Figma 디자인 폰트 (가변 폰트, SIL Open Font License) |
+
 ## 실행 방법
 
 1. Android Studio로 프로젝트를 엽니다.
@@ -92,6 +128,7 @@ Screen (Compose) ── 이벤트 ──▶ ViewModel ──▶ Repository ─�
 ### UI 작업 규칙
 
 - Figma 수치(px)는 그대로 `24.px`, `34.pxSp`처럼 씁니다. 화면 너비에 맞춰 자동 변환됩니다.
+- 텍스트 스타일은 `astaStyle(크기, 굵기, 색상, 행간배수)`(`ui/theme/Type.kt`), 색상은 `PickMeUpColors`(`ui/theme/Color.kt`)를 씁니다.
 - 모든 문구는 `res/values/strings.xml`에 둡니다. (큰따옴표는 `\"`로 이스케이프)
 
 ## 남은 작업
