@@ -23,6 +23,19 @@ class LocationRequestViewModelTest {
     private val vm by lazy { LocationRequestViewModel(SavedStateHandle(), repository) }
 
     @Test
+    fun selectedTargetArgs_prefillInputs() {
+        // 픽업 불러오기에서 대상자를 고르면 화면 경로 인자(name, phoneDigits)가 SavedStateHandle 로 들어옴
+        val prefilled = LocationRequestViewModel(
+            SavedStateHandle(mapOf("name" to "김민수", "phoneDigits" to "01012345678")),
+            repository,
+        )
+
+        assertEquals("김민수", prefilled.uiState.value.name)
+        assertEquals("01012345678", prefilled.uiState.value.phoneDigits)
+        assertTrue(prefilled.uiState.value.canRequest)
+    }
+
+    @Test
     fun phoneInput_isStoredAsDigitsOnly() {
         vm.onPhoneChange("010-1234-5678")
 
