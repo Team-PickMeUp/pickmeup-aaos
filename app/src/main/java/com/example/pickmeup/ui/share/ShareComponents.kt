@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -48,6 +49,8 @@ internal fun ShareScreenScaffold(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
+    /** 화면 전체 위에 덮는 팝업 등 (설정 버튼보다 위) */
+    overlay: @Composable BoxScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ProvideDesignScale(
@@ -89,6 +92,7 @@ internal fun ShareScreenScaffold(
                     .align(Alignment.TopEnd)
                     .padding(top = 23.px, end = 23.px),
             )
+            overlay()
         }
     }
 }

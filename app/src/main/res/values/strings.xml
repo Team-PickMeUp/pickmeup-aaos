@@ -86,6 +86,12 @@
     <string name="pickup_cancel">픽업 취소하기</string>
     <string name="pickup_complete">픽업 완료하기</string>
 
+    <!-- 픽업 종료 결과 팝업 (Figma 8-1, 8-2) -->
+    <string name="pickup_result_cancelled_title">픽업이 취소되었습니다.</string>
+    <string name="pickup_result_cancelled_desc">픽업 진행이 종료되었습니다.\n새로운 픽업이 필요하면 위치 요청을 다시 진행해 주세요.</string>
+    <string name="pickup_result_completed_title">픽업이 완료되었습니다.</string>
+    <string name="pickup_result_completed_desc">픽업이 정상적으로 완료되었습니다.\n안전한 이동을 함께해 주셔서 감사합니다.</string>
+
     <!-- 설정 (Figma 37:9324) -->
     <string name="settings_title">설정</string>
     <string name="settings_intro">앱 이용 안내와 약관을 확인할 수 있어요.</string>
@@ -124,5 +130,6 @@
     <string name="guide_step3_destination">목적지로 설정하기</string>
     <string name="guide_page_description">%1$d / %2$d 페이지</string>
     <string name="common_back">뒤로 가기</string>
+    <string name="common_confirm">확인</string>
     <string name="coming_soon">준비 중인 화면이에요</string>
 </resources>
