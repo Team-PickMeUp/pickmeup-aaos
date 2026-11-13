@@ -52,13 +52,18 @@ class RemotePickupRepository @Inject constructor(
         answered.toShareResult().also { _currentShare.value = it }
     }
 
+    override suspend fun cancelLocationRequest(): Result<Unit> = runSuspendCatching {
+        currentRequestId?.let { api.cancelLocationRequest(it) }
+        clear()
+    }
+
     override suspend fun completePickup(): Result<Unit> = runSuspendCatching {
         currentRequestId?.let { api.completePickup(it) }
         clear()
     }
 
     override suspend fun cancelPickup(): Result<Unit> = runSuspendCatching {
-        currentRequestId?.let { api.cancelPickup(it) }
+        currentRequestId?.let { api.cancelLocationRequest(it) }
         clear()
     }
 

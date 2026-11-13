@@ -1,5 +1,6 @@
 package com.example.pickmeup.ui.location
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -68,6 +69,8 @@ fun LocationRequestRoute(
     viewModel: LocationRequestViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // 응답 대기 중 뒤로 가기 = 요청 취소 (화면은 그대로)
+    BackHandler(enabled = uiState.isRequesting, onBack = viewModel::cancelRequest)
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
@@ -82,6 +85,7 @@ fun LocationRequestRoute(
         onPhoneChange = viewModel::onPhoneChange,
         onSaveForNextChange = viewModel::onSaveForNextChange,
         onRequestLocation = viewModel::requestLocation,
+        onCancelRequest = viewModel::cancelRequest,
         onBack = onBack,
         onAppGuideClick = onAppGuideClick,
         onSettingsClick = onSettingsClick,
@@ -95,6 +99,7 @@ fun LocationRequestRoute(
  * - 전화번호: 숫자 키패드, 자동 하이픈, 국내 휴대전화 형식일 때만 유효
  * - 둘 다 유효할 때만 "위치요청하기" 활성 (Figma 컴포넌트 State=Enabled/Disabled 설명 기준)
  * - "다음 픽업을 위해 대상자 저장" 체크 시 요청 성공 후 대상자 저장 → 픽업 불러오기에 표시
+ * - 요청 후 대상자 응답까지 대기 팝업 표시 (Figma 4), 요청 취소 시 이 화면에 머묾
  *
  * Figma에서 숨김 처리된 "저장된 픽업 대상자" 목록과 기획용 번호는 구현하지 않았습니다.
  */
@@ -105,6 +110,7 @@ fun LocationRequestScreen(
     onPhoneChange: (String) -> Unit,
     onSaveForNextChange: (Boolean) -> Unit,
     onRequestLocation: () -> Unit,
+    onCancelRequest: () -> Unit,
     onBack: () -> Unit,
     onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -253,6 +259,10 @@ fun LocationRequestScreen(
                     .align(Alignment.TopEnd)
                     .padding(top = 23.px, end = 23.px),
             )
+
+            if (uiState.isRequesting) {
+                LocationShareWaitingDialog(onCancel = onCancelRequest)
+            }
         }
     }
 }
@@ -374,7 +384,8 @@ private fun RequestLocationButton(enabled: Boolean, onClick: () -> Unit) {
 private fun LocationRequestScreenPreview() {
     LocationRequestScreen(
         uiState = LocationRequestUiState(name = "홍길동", phoneDigits = "01012345678"),
-        onNameChange = {}, onPhoneChange = {}, onSaveForNextChange = {}, onRequestLocation = {},
+        onNameChange = {}, onPhoneChange = {}, onSaveForNextChange = {},
+        onRequestLocation = {}, onCancelRequest = {},
         onBack = {}, onAppGuideClick = {}, onSettingsClick = {},
     )
 }

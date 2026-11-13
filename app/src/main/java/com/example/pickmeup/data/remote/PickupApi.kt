@@ -27,7 +27,10 @@ interface PickupApi {
     @POST("api/v1/location-requests/{id}/complete")
     suspend fun completePickup(@Path("id") id: Long)
 
-    /** 픽업 취소 */
+    /**
+     * 요청 취소 — 응답 대기 중 취소, 픽업 진행 중 취소 모두 사용.
+     * 서버는 대상자 웹 링크를 즉시 무효화해야 함 (Figma 개발 명세 9-4)
+     */
     @POST("api/v1/location-requests/{id}/cancel")
-    suspend fun cancelPickup(@Path("id") id: Long)
+    suspend fun cancelLocationRequest(@Path("id") id: Long)
 }
