@@ -49,7 +49,7 @@ private data class SettingsItem(
 )
 
 /**
- * 설정 화면 (Figma node 37:9324 "설정화면").
+ * 설정 화면 (Figma node 37:9324 "2-2 설정화면").
  * 이용 안내 / 픽업 설정 / 약관 및 개인정보 3개 그룹으로 구성됩니다.
  */
 @Composable
@@ -58,6 +58,7 @@ fun SettingsScreen(
     onAppGuideClick: () -> Unit,
     onPickupTargetClick: () -> Unit,
     onLocationTermsClick: () -> Unit,
+    onServiceTermsClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -116,6 +117,12 @@ fun SettingsScreen(
                             R.string.terms_location_title,
                             R.string.settings_location_terms_desc,
                             onLocationTermsClick,
+                        ),
+                        SettingsItem(
+                            R.drawable.ic_settings_book,
+                            R.string.terms_service_title,
+                            R.string.settings_service_terms_desc,
+                            onServiceTermsClick,
                         ),
                         SettingsItem(
                             R.drawable.ic_settings_shield,
@@ -212,6 +219,7 @@ private fun SettingsScreenPreview() {
         onAppGuideClick = {},
         onPickupTargetClick = {},
         onLocationTermsClick = {},
+        onServiceTermsClick = {},
         onPrivacyPolicyClick = {},
     )
 }
