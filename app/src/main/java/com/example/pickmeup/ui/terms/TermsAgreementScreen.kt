@@ -55,7 +55,7 @@ private val FigmaSampleArticles = listOf(
 
 /**
  * 동의 항목. 모두 필수입니다.
- * 화면 경로(TermsDetailRoute)의 인자로 쓰여서 release 빌드 난독화에서 제외(@Keep)합니다.
+ * 화면 경로(TermsDetailDestination)의 인자로 쓰여서 release 빌드 난독화에서 제외(@Keep)합니다.
  */
 @Keep
 enum class TermsType(

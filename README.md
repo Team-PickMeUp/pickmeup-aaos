@@ -36,7 +36,7 @@ Screen (Compose) ── 이벤트 ──▶ ViewModel ──▶ Repository ─�
 
 - 상태 없는 화면(메인, 가이드, 설정, 약관 상세)은 ViewModel 없이 `Screen`만 존재
 - 일회성 이벤트(화면 이동 등)는 ViewModel의 `Channel`로 전달
-- 새 화면 추가: `Routes.kt`에 경로 추가 → `PickMeUpNavHost.kt`에 `composable` 등록
+- 새 화면 추가: `Destinations.kt`에 경로(`XxxDestination`) 추가 → `PickMeUpNavHost.kt`에 `composable` 등록
 
 ## 프로젝트 구조
 
@@ -44,7 +44,7 @@ Screen (Compose) ── 이벤트 ──▶ ViewModel ──▶ Repository ─�
 app/src/main/java/com/example/pickmeup/
 ├── PickMeUpApplication.kt   # Hilt 시작점
 ├── MainActivity.kt          # 약관 동의 여부로 시작 화면 결정
-├── navigation/              # 화면 경로(Routes), NavHost
+├── navigation/              # 화면 경로(Destinations), NavHost
 ├── di/                      # Hilt 모듈 (네트워크, 저장소 연결)
 ├── model/                   # 화면·데이터 계층 공용 모델
 ├── data/
