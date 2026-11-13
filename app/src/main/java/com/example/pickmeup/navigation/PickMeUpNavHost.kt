@@ -21,6 +21,7 @@ import com.example.pickmeup.ui.main.MainScreen
 import com.example.pickmeup.ui.settings.SettingsScreen
 import com.example.pickmeup.ui.share.LocationShareResultRoute
 import com.example.pickmeup.ui.share.PickupInProgressRoute
+import com.example.pickmeup.ui.target.PickupTargetManageRoute
 import com.example.pickmeup.ui.target.PickupTargetSelectRoute
 import com.example.pickmeup.ui.terms.TermsAgreementRoute
 import com.example.pickmeup.ui.terms.TermsDetailScreen
@@ -91,7 +92,18 @@ fun PickMeUpNavHost(
                     navController.navigate(LocationRequestDestination(target.name, target.phoneDigits))
                 },
                 onManualInputClick = { navController.navigate(LocationRequestDestination()) },
-                onViewAllClick = showComingSoon, // TODO: 2-1-1 전체 프로필 관리 (별도 이슈)
+                onViewAllClick = { navController.navigateSingle(PickupTargetManageDestination) },
+            )
+        }
+
+        composable<PickupTargetManageDestination> { entry ->
+            PickupTargetManageRoute(
+                onBack = navController.backFrom(entry),
+                onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
+                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
+                onTargetSelected = { target ->
+                    navController.navigate(LocationRequestDestination(target.name, target.phoneDigits))
+                },
             )
         }
 
