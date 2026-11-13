@@ -31,4 +31,10 @@ class FakePickupTargetRepository(initial: List<PickupTarget> = emptyList()) : Pi
         state.value = stored
         return Result.success(saved)
     }
+
+    override suspend fun delete(id: String): Result<Unit> {
+        stored = stored.filterNot { it.id == id }
+        state.value = stored
+        return Result.success(Unit)
+    }
 }

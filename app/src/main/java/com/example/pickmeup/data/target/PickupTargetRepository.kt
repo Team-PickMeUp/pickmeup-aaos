@@ -37,6 +37,9 @@ interface PickupTargetRepository {
 
     /** 대상자 저장. 같은 전화번호가 있으면 이름을 덮어쓰고 맨 앞으로 */
     suspend fun save(name: String, phoneDigits: String): Result<PickupTarget>
+
+    /** 대상자 삭제. 없는 ID 면 아무것도 하지 않음 */
+    suspend fun delete(id: String): Result<Unit>
 }
 
 /**
@@ -75,6 +78,14 @@ class LocalPickupTargetRepository @Inject constructor(
             persist(updated)
             _targets.value = updated
             saved
+        }
+    }
+
+    override suspend fun delete(id: String): Result<Unit> = runSuspendCatching {
+        mutex.withLock {
+            val updated = load().filterNot { it.id == id }
+            persist(updated)
+            _targets.value = updated
         }
     }
 
