@@ -1,7 +1,7 @@
 package com.example.pickmeup.ui.main
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import com.example.pickmeup.R
+import com.example.pickmeup.ui.components.GuideButton
 import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
@@ -36,19 +37,20 @@ import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
 private val ButtonPurple = Color(0xFF5A46FA)
-private val ButtonPurpleBorder = Color(0xFF8F80F5)
 
 /**
- * 메인 화면 (Figma node 18:21218 "메인화면").
+ * 메인 화면 (Figma node 18:21218 "2 메인화면").
  * 디자인의 절대 위치를 화면 중앙 기준 오프셋으로 옮겼습니다.
  *  - 버튼1 중심 = 화면 중앙, 버튼2 중심 = 중앙 +256px
  *  - 문구 중심 = y 323px (중앙 592px 기준 -269px)
+ *  - 오른쪽 위: 가이드(책) 버튼 right 101px, 설정 버튼 right 23px
  */
 @Composable
 fun MainScreen(
     onSettingsClick: () -> Unit,
-    onRequestLocationClick: () -> Unit,
     onAppGuideClick: () -> Unit,
+    onRequestLocationClick: () -> Unit,
+    onLoadPickupTargetsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ProvideDesignScale(
@@ -57,6 +59,12 @@ fun MainScreen(
             .background(PickMeUpColors.BackgroundPrimary),
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            GuideButton(
+                onClick = onAppGuideClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 23.px, end = 101.px),
+            )
             SettingsButton(
                 onClick = onSettingsClick,
                 modifier = Modifier
@@ -66,32 +74,23 @@ fun MainScreen(
 
             Text(
                 text = stringResource(R.string.main_greeting),
-                style = astaStyle(60.pxSp, FontWeight.Bold, Color.Black, lineHeightMultiplier = 80f / 60f),
+                style = astaStyle(60.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, lineHeightMultiplier = 80f / 60f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.offset(y = (-269).px),
             )
 
             MainActionButton(
                 text = stringResource(R.string.main_request_location),
+                icon = R.drawable.ic_map_pin,
                 onClick = onRequestLocationClick,
-                bordered = false,
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_map_pin),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(52.px),
-                )
-            }
+            )
 
             MainActionButton(
-                text = stringResource(R.string.main_app_guide),
-                onClick = onAppGuideClick,
-                bordered = true,
+                text = stringResource(R.string.main_load_pickup_targets),
+                icon = R.drawable.ic_pickup_targets,
+                onClick = onLoadPickupTargetsClick,
                 modifier = Modifier.offset(y = 256.px),
-            ) {
-                GuideIcon()
-            }
+            )
         }
     }
 }
@@ -100,10 +99,9 @@ fun MainScreen(
 @Composable
 private fun MainActionButton(
     text: String,
+    @DrawableRes icon: Int,
     onClick: () -> Unit,
-    bordered: Boolean,
     modifier: Modifier = Modifier,
-    icon: @Composable () -> Unit,
 ) {
     val shape = RoundedCornerShape(32.px)
     Row(
@@ -113,13 +111,17 @@ private fun MainActionButton(
             .dropShadow(shape, Shadow(radius = 2.px, offset = DpOffset(0.px, 2.px), color = Color(0x14000000)))
             .clip(shape)
             .background(ButtonPurple)
-            .then(if (bordered) Modifier.border(1.px, ButtonPurpleBorder, shape) else Modifier)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = 24.px),
         horizontalArrangement = Arrangement.spacedBy(12.px, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        icon()
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier.size(52.px),
+        )
         Text(
             text = text,
             style = astaStyle(60.pxSp, FontWeight.ExtraBold, Color.White, lineHeightMultiplier = 80f / 60f),
@@ -127,26 +129,11 @@ private fun MainActionButton(
     }
 }
 
-/** Figma guide-icon: 52px 박스 안에 원(48px, 2px inset) + "?" 글자 */
-@Composable
-private fun GuideIcon() {
-    Box(Modifier.size(52.px), contentAlignment = Alignment.Center) {
-        Icon(
-            painter = painterResource(R.drawable.ic_help_circle),
-            contentDescription = null,
-            tint = Color.Unspecified,
-            modifier = Modifier.size(48.px),
-        )
-        Text(
-            text = "?",
-            style = astaStyle(32.pxSp, FontWeight.Bold, Color.White),
-            textAlign = TextAlign.Center,
-        )
-    }
-}
-
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable
 private fun MainScreenPreview() {
-    MainScreen(onSettingsClick = {}, onRequestLocationClick = {}, onAppGuideClick = {})
+    MainScreen(
+        onSettingsClick = {}, onAppGuideClick = {},
+        onRequestLocationClick = {}, onLoadPickupTargetsClick = {},
+    )
 }

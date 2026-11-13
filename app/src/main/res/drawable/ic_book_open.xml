@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma: Pleos 48px grid / book-open / outlined (node 442:27121) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:pathData="M24 13V42M24 42C27 39 30 38 35 38H42C42.5304 38 43.0391 37.7893 43.4142 37.4142C43.7893 37.0391 44 36.5304 44 36V11C44 10.2044 43.6839 9.44129 43.1213 8.87868C42.5587 8.31607 41.7957 8 41 8H35C31 8 28 9 24 13C20 9 17 8 13 8H7C6.20435 8 5.44129 8.31607 4.87868 8.87868C4.31607 9.44129 4 10.2044 4 11V36C4 36.5304 4.21071 37.0391 4.58579 37.4142C4.96086 37.7893 5.46957 38 6 38H13C18 38 21 39 24 42Z"
+        android:strokeWidth="3.6"
+        android:strokeColor="#FF131417"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

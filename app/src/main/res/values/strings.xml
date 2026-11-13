@@ -37,7 +37,8 @@
     <!-- 메인 화면 -->
     <string name="main_greeting">오늘은 어떤 분을 픽업해볼까요?</string>
     <string name="main_request_location">위치 요청하기</string>
-    <string name="main_app_guide">앱 사용가이드</string>
+    <string name="main_load_pickup_targets">픽업 불러오기</string>
+    <string name="main_app_guide">앱 사용 가이드</string>
     <string name="main_settings">설정</string>
     <!-- 위치 요청 화면 -->
     <string name="location_request_title">위치 요청</string>
