@@ -75,8 +75,9 @@ fun PickMeUpNavHost(
         composable<MainRoute> {
             MainScreen(
                 onSettingsClick = { navController.navigateSingle(SettingsRoute) },
-                onRequestLocationClick = { navController.navigateSingle(LocationRequestRoute) },
                 onAppGuideClick = { navController.navigateSingle(AppGuideRoute) },
+                onRequestLocationClick = { navController.navigateSingle(LocationRequestRoute) },
+                onLoadPickupTargetsClick = showComingSoon, // TODO: 2-1 프로필 불러오는 화면 (별도 이슈)
             )
         }
 
