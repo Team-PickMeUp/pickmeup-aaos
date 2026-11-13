@@ -21,10 +21,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +41,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickmeup.R
 import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
@@ -70,15 +70,43 @@ private val ButtonDisabled = Color(0xFFB9B1FC)
  * 기획용 번호(1, 2)는 구현하지 않았습니다.
  */
 @Composable
-fun LocationRequestScreen(
+fun LocationRequestRoute(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit,
-    onRequestLocation: (name: String, phoneDigits: String) -> Unit,
+    onResponseReceived: () -> Unit,
+    viewModel: LocationRequestViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                LocationRequestEvent.ResponseReceived -> onResponseReceived()
+                is LocationRequestEvent.RequestFailed -> Unit // TODO: 실패 안내 UI (Figma 미정)
+            }
+        }
+    }
+    LocationRequestScreen(
+        uiState = uiState,
+        onNameChange = viewModel::onNameChange,
+        onPhoneChange = viewModel::onPhoneChange,
+        onRequestLocation = viewModel::requestLocation,
+        onBack = onBack,
+        onSettingsClick = onSettingsClick,
+    )
+}
+
+@Composable
+fun LocationRequestScreen(
+    uiState: LocationRequestUiState,
+    onNameChange: (String) -> Unit,
+    onPhoneChange: (String) -> Unit,
+    onRequestLocation: () -> Unit,
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var phoneDigits by rememberSaveable { mutableStateOf("") }
-    val canRequest = name.isNotBlank() && PhoneNumber.isValidMobile(phoneDigits)
+    val name = uiState.name
+    val phoneDigits = uiState.phoneDigits
 
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
@@ -153,7 +181,7 @@ fun LocationRequestScreen(
                             label = stringResource(R.string.location_request_name_label),
                             placeholder = stringResource(R.string.location_request_name_hint),
                             value = TextFieldValue(name, TextRange(name.length)),
-                            onValueChange = { name = it.text },
+                            onValueChange = { onNameChange(it.text) },
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(
                                 onNext = { focusManager.moveFocus(FocusDirection.Down) },
@@ -164,7 +192,7 @@ fun LocationRequestScreen(
                             label = stringResource(R.string.location_request_phone_label),
                             placeholder = stringResource(R.string.location_request_phone_hint),
                             value = TextFieldValue(formatted, TextRange(formatted.length)),
-                            onValueChange = { phoneDigits = PhoneNumber.digitsOf(it.text) },
+                            onValueChange = { onPhoneChange(it.text) },
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Phone,
                                 imeAction = ImeAction.Done,
@@ -178,10 +206,10 @@ fun LocationRequestScreen(
                         )
                     }
                     RequestLocationButton(
-                        enabled = canRequest,
+                        enabled = uiState.canRequest,
                         onClick = {
                             keyboard?.hide()
-                            onRequestLocation(name.trim(), phoneDigits)
+                            onRequestLocation()
                         },
                     )
                 }
@@ -291,5 +319,9 @@ private fun RequestLocationButton(enabled: Boolean, onClick: () -> Unit) {
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable
 private fun LocationRequestScreenPreview() {
-    LocationRequestScreen(onBack = {}, onSettingsClick = {}, onRequestLocation = { _, _ -> })
+    LocationRequestScreen(
+        uiState = LocationRequestUiState(name = "홍길동", phoneDigits = "01012345678"),
+        onNameChange = {}, onPhoneChange = {}, onRequestLocation = {},
+        onBack = {}, onSettingsClick = {},
+    )
 }

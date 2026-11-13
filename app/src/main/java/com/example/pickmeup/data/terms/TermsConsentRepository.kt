@@ -1,23 +1,35 @@
-package com.example.pickmeup.data
+package com.example.pickmeup.data.terms
 
 import android.content.Context
 import androidx.core.content.edit
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/** 최초 실행 약관 동의 여부 저장소 */
+interface TermsConsentRepository {
+    fun hasAgreedToCurrentTerms(): Boolean
+    fun saveAgreement(nowMillis: Long = System.currentTimeMillis())
+}
 
 /**
- * 최초 실행 약관 동의 여부를 기기에 저장합니다.
+ * 약관 동의 여부를 기기(SharedPreferences)에 저장합니다.
  *
  * 약관 내용이 바뀌면 [CURRENT_TERMS_VERSION]을 올리세요.
  * 저장된 버전이 현재 버전보다 낮으면 동의 화면이 다시 표시됩니다.
+ * 백업 대상에서 제외되어 있습니다 (res/xml/backup_rules.xml, data_extraction_rules.xml).
  */
-class TermsConsentRepository(context: Context) {
+@Singleton
+class LocalTermsConsentRepository @Inject constructor(
+    @ApplicationContext context: Context,
+) : TermsConsentRepository {
 
-    private val prefs = context.applicationContext
-        .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun hasAgreedToCurrentTerms(): Boolean =
+    override fun hasAgreedToCurrentTerms(): Boolean =
         prefs.getInt(KEY_AGREED_VERSION, 0) >= CURRENT_TERMS_VERSION
 
-    fun saveAgreement(nowMillis: Long = System.currentTimeMillis()) {
+    override fun saveAgreement(nowMillis: Long) {
         prefs.edit {
             putInt(KEY_AGREED_VERSION, CURRENT_TERMS_VERSION)
             putLong(KEY_AGREED_AT, nowMillis)

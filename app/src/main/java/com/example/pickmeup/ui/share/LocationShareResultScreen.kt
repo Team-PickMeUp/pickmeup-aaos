@@ -1,10 +1,40 @@
 package com.example.pickmeup.ui.share
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickmeup.R
+import com.example.pickmeup.model.LocationShareResult
+
+@Composable
+fun LocationShareResultRoute(
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onPickupStarted: () -> Unit,
+    viewModel: ShareResultViewModel = hiltViewModel(),
+) {
+    val result by viewModel.shareResult.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel) { viewModel.pickupStarted.collect { onPickupStarted() } }
+
+    val current = result
+    if (current == null) {
+        // 결과 없이 들어온 경우(비정상) 이전 화면으로
+        LaunchedEffect(Unit) { onBack() }
+        return
+    }
+    LocationShareResultScreen(
+        result = current,
+        onBack = onBack,
+        onSettingsClick = onSettingsClick,
+        onSetWaypoint = viewModel::setAsWaypoint,
+        onSetDestination = viewModel::setAsDestination,
+    )
+}
 
 /**
  * 위치 공유 결과 화면 — "경유지 / 목적지 선택".

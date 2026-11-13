@@ -23,9 +23,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,16 +88,34 @@ enum class TermsType(
  * 앱 창 영역만 그립니다.
  */
 @Composable
+fun TermsAgreementRoute(
+    onAgreed: () -> Unit,
+    onDisagree: () -> Unit,
+    onViewDetail: (TermsType) -> Unit,
+    viewModel: TermsAgreementViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    TermsAgreementScreen(
+        uiState = uiState,
+        onCheckedChange = viewModel::onCheckedChange,
+        onCheckAllChange = viewModel::onCheckAllChange,
+        onAgreeAndStart = { if (viewModel.agree()) onAgreed() },
+        onDisagree = onDisagree,
+        onViewDetail = onViewDetail,
+    )
+}
+
+@Composable
 fun TermsAgreementScreen(
+    uiState: TermsAgreementUiState,
+    onCheckedChange: (TermsType, Boolean) -> Unit,
+    onCheckAllChange: (Boolean) -> Unit,
     onAgreeAndStart: () -> Unit,
     onDisagree: () -> Unit,
     onViewDetail: (TermsType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val checked = rememberSaveable(saver = checkedMapSaver) {
-        mutableStateMapOf<TermsType, Boolean>()
-    }
-    val allChecked = TermsType.entries.all { checked[it] == true }
+    val allChecked = uiState.allChecked
 
     ProvideDesignScale(
         modifier
@@ -150,8 +168,8 @@ fun TermsAgreementScreen(
                     TermsType.entries.forEach { type ->
                         TermsItemCard(
                             type = type,
-                            checked = checked[type] == true,
-                            onCheckedChange = { checked[type] = it },
+                            checked = type in uiState.checked,
+                            onCheckedChange = { onCheckedChange(type, it) },
                             onViewDetail = { onViewDetail(type) },
                         )
                     }
@@ -165,9 +183,7 @@ fun TermsAgreementScreen(
                             .toggleable(
                                 value = allChecked,
                                 role = Role.Checkbox,
-                                onValueChange = { all ->
-                                    TermsType.entries.forEach { checked[it] = all }
-                                },
+                                onValueChange = onCheckAllChange,
                             ),
                         horizontalArrangement = Arrangement.spacedBy(16.px),
                         verticalAlignment = Alignment.CenterVertically,
@@ -356,17 +372,12 @@ internal fun astaStyle(
     lineHeight = if (lineHeightMultiplier != null) size * lineHeightMultiplier else TextUnit.Unspecified,
 )
 
-private val checkedMapSaver = listSaver<MutableMap<TermsType, Boolean>, String>(
-    save = { map -> map.filterValues { it }.keys.map { it.name } },
-    restore = { names ->
-        mutableStateMapOf<TermsType, Boolean>().apply {
-            names.forEach { put(TermsType.valueOf(it), true) }
-        }
-    },
-)
-
 @Preview(widthDp = 1700, heightDp = 1280, showBackground = true)
 @Composable
 private fun TermsAgreementScreenPreview() {
-    TermsAgreementScreen(onAgreeAndStart = {}, onDisagree = {}, onViewDetail = {})
+    TermsAgreementScreen(
+        uiState = TermsAgreementUiState(),
+        onCheckedChange = { _, _ -> }, onCheckAllChange = {},
+        onAgreeAndStart = {}, onDisagree = {}, onViewDetail = {},
+    )
 }
