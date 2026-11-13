@@ -1,5 +1,6 @@
 package com.example.pickmeup.ui.terms
 
+import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,9 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,16 +32,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickmeup.R
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
-import com.example.pickmeup.ui.theme.AstaSans
 import com.example.pickmeup.ui.theme.PickMeUpColors
+import com.example.pickmeup.ui.theme.astaStyle
 
 /** 약관 조항: 제목 + 본문 */
 data class TermsArticle(@StringRes val title: Int, @StringRes val body: Int)
@@ -54,7 +53,11 @@ private val FigmaSampleArticles = listOf(
     TermsArticle(R.string.terms_sample_article3_title, R.string.terms_sample_article3_body),
 )
 
-/** 동의 항목. 모두 필수입니다. */
+/**
+ * 동의 항목. 모두 필수입니다.
+ * 화면 경로(TermsDetailRoute)의 인자로 쓰여서 release 빌드 난독화에서 제외(@Keep)합니다.
+ */
+@Keep
 enum class TermsType(
     @StringRes val title: Int,
     @StringRes val description: Int,
@@ -88,16 +91,34 @@ enum class TermsType(
  * 앱 창 영역만 그립니다.
  */
 @Composable
+fun TermsAgreementRoute(
+    onAgreed: () -> Unit,
+    onDisagree: () -> Unit,
+    onViewDetail: (TermsType) -> Unit,
+    viewModel: TermsAgreementViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    TermsAgreementScreen(
+        uiState = uiState,
+        onCheckedChange = viewModel::onCheckedChange,
+        onCheckAllChange = viewModel::onCheckAllChange,
+        onAgreeAndStart = { if (viewModel.agree()) onAgreed() },
+        onDisagree = onDisagree,
+        onViewDetail = onViewDetail,
+    )
+}
+
+@Composable
 fun TermsAgreementScreen(
+    uiState: TermsAgreementUiState,
+    onCheckedChange: (TermsType, Boolean) -> Unit,
+    onCheckAllChange: (Boolean) -> Unit,
     onAgreeAndStart: () -> Unit,
     onDisagree: () -> Unit,
     onViewDetail: (TermsType) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val checked = rememberSaveable(saver = checkedMapSaver) {
-        mutableStateMapOf<TermsType, Boolean>()
-    }
-    val allChecked = TermsType.entries.all { checked[it] == true }
+    val allChecked = uiState.allChecked
 
     ProvideDesignScale(
         modifier
@@ -150,8 +171,8 @@ fun TermsAgreementScreen(
                     TermsType.entries.forEach { type ->
                         TermsItemCard(
                             type = type,
-                            checked = checked[type] == true,
-                            onCheckedChange = { checked[type] = it },
+                            checked = type in uiState.checked,
+                            onCheckedChange = { onCheckedChange(type, it) },
                             onViewDetail = { onViewDetail(type) },
                         )
                     }
@@ -165,9 +186,7 @@ fun TermsAgreementScreen(
                             .toggleable(
                                 value = allChecked,
                                 role = Role.Checkbox,
-                                onValueChange = { all ->
-                                    TermsType.entries.forEach { checked[it] = all }
-                                },
+                                onValueChange = onCheckAllChange,
                             ),
                         horizontalArrangement = Arrangement.spacedBy(16.px),
                         verticalAlignment = Alignment.CenterVertically,
@@ -343,30 +362,12 @@ private fun ActionButton(
     }
 }
 
-internal fun astaStyle(
-    size: TextUnit,
-    weight: FontWeight,
-    color: Color,
-    lineHeightMultiplier: Float? = null,
-) = TextStyle(
-    fontFamily = AstaSans,
-    fontWeight = weight,
-    fontSize = size,
-    color = color,
-    lineHeight = if (lineHeightMultiplier != null) size * lineHeightMultiplier else TextUnit.Unspecified,
-)
-
-private val checkedMapSaver = listSaver<MutableMap<TermsType, Boolean>, String>(
-    save = { map -> map.filterValues { it }.keys.map { it.name } },
-    restore = { names ->
-        mutableStateMapOf<TermsType, Boolean>().apply {
-            names.forEach { put(TermsType.valueOf(it), true) }
-        }
-    },
-)
-
 @Preview(widthDp = 1700, heightDp = 1280, showBackground = true)
 @Composable
 private fun TermsAgreementScreenPreview() {
-    TermsAgreementScreen(onAgreeAndStart = {}, onDisagree = {}, onViewDetail = {})
+    TermsAgreementScreen(
+        uiState = TermsAgreementUiState(),
+        onCheckedChange = { _, _ -> }, onCheckAllChange = {},
+        onAgreeAndStart = {}, onDisagree = {}, onViewDetail = {},
+    )
 }

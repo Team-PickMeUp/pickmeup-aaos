@@ -1,12 +1,14 @@
 package com.example.pickmeup.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.example.pickmeup.R
 
@@ -40,8 +42,26 @@ val AstaSans = FontFamily(
     ),
 )
 
-// Set of Material typography styles to start with
-val Typography = Typography(
+/**
+ * Figma 텍스트 스타일 → TextStyle.
+ * @param size `34.pxSp` 처럼 Figma 크기 그대로
+ * @param lineHeightMultiplier Figma 행간 ÷ 글자 크기 (예: 44px / 34px). null 이면 폰트 기본값
+ */
+fun astaStyle(
+    size: TextUnit,
+    weight: FontWeight,
+    color: Color,
+    lineHeightMultiplier: Float? = null,
+) = TextStyle(
+    fontFamily = AstaSans,
+    fontWeight = weight,
+    fontSize = size,
+    color = color,
+    lineHeight = if (lineHeightMultiplier != null) size * lineHeightMultiplier else TextUnit.Unspecified,
+)
+
+/** 스타일을 지정하지 않은 Material 텍스트의 기본값 */
+internal val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = AstaSans,
         fontWeight = FontWeight.Normal,

@@ -12,7 +12,6 @@
     <string name="terms_agree_and_start">동의하고 시작하기</string>
     <string name="terms_disagree">동의하지 않음</string>
     <string name="terms_footnote">모두 동의하기 전에는 시작하기가 비활성 상태입니다. 동의하지 않으면 픽미업 이용을 시작하지 않고 종료하거나 돌아갈 수 있습니다.</string>
-    <string name="terms_back">뒤로 가기</string>
 
     <string name="terms_service_title">서비스 이용약관</string>
     <string name="terms_service_desc">앱 전반의 사용 규칙, 이용 제한, 책임 소재, 서비스 중단 기준 등 이용에 필요한 내용을 확인합니다.</string>

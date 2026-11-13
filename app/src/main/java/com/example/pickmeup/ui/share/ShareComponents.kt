@@ -32,8 +32,8 @@ import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
-import com.example.pickmeup.ui.terms.astaStyle
 import com.example.pickmeup.ui.theme.PickMeUpColors
+import com.example.pickmeup.ui.theme.astaStyle
 
 private val Purple = Color(0xFF5A46FA)
 private val CardBorder = Color(0xFFDADCE3)
@@ -179,6 +179,7 @@ internal fun CardButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     primary: Boolean = true,
+    enabled: Boolean = true,
 ) {
     val shape = RoundedCornerShape(16.px)
     Box(
@@ -187,7 +188,7 @@ internal fun CardButton(
             .clip(shape)
             .background(if (primary) Purple else Color.White)
             .then(if (primary) Modifier else Modifier.border(2.px, CardBorder, shape))
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 24.px),
         contentAlignment = Alignment.Center,
     ) {

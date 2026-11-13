@@ -19,6 +19,7 @@ import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
+import com.example.pickmeup.ui.theme.astaStyle
 
 /**
  * 약관 전문 화면.
