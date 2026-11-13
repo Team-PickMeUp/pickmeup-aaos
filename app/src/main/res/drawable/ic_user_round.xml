@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma: user-round (node 383:24000) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="81.6dp"
+    android:height="81.6dp"
+    android:viewportWidth="81.6"
+    android:viewportHeight="81.6">
+    <path
+        android:pathData="M40.7998 44.2C50.1877 44.2 57.7981 36.5888 57.7981 27.2C57.7981 17.8111 50.1877 10.2 40.7998 10.2C31.4119 10.2 23.8015 17.8111 23.8015 27.2C23.8015 36.5888 31.4119 44.2 40.7998 44.2ZM40.7998 44.2C48.013 44.2 54.9307 47.0657 60.0312 52.1666C65.1317 57.2676 67.9971 64.1861 67.9971 71.4M40.7998 44.2C33.5867 44.2 26.6689 47.0657 21.5684 52.1666C16.468 57.2676 13.6025 64.1861 13.6025 71.4"
+        android:strokeWidth="6.375"
+        android:strokeColor="#FF5A46FA"
+        android:strokeLineCap="round" />
+</vector>

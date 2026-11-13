@@ -17,8 +17,19 @@ data class TermsDetailDestination(val type: TermsType)
 @Serializable
 data object MainDestination
 
+/**
+ * 위치 요청. 저장된 대상자를 골라서 들어오면 이름·전화번호가 채워진 상태로 시작
+ * (인자 이름이 LocationRequestViewModel 의 SavedStateHandle 키와 같아서 자동으로 들어감)
+ */
 @Serializable
-data object LocationRequestDestination
+data class LocationRequestDestination(
+    val name: String = "",
+    val phoneDigits: String = "",
+)
+
+/** 픽업 불러오기 — 저장된 대상자 선택 */
+@Serializable
+data object PickupTargetSelectDestination
 
 /** 위치 공유 결과 — 경유지 / 목적지 선택 */
 @Serializable
