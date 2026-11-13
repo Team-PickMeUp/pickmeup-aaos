@@ -9,13 +9,14 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Duration
 
 class PickupInProgressViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val repository = FakePickupRepository()
+    private val repository = FakePickupRepository(responseDelay = Duration.ZERO)
 
     @Test
     fun withoutActivePickup_locationIsNull() {
