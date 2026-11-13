@@ -36,8 +36,6 @@ import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
-private val TextStrong = Color(0xD6131417)   // rgba(19,20,23,0.84)
-private val TextMuted = Color(0xA3131417)    // rgba(19,20,23,0.64)
 private val IconBg = Color(0xFFEEEBFF)
 private val ItemDivider = Color(0xFFE5E6EC)
 
@@ -85,7 +83,7 @@ fun SettingsScreen(
             ) {
                 Text(
                     text = stringResource(R.string.settings_intro),
-                    style = astaStyle(32.pxSp, FontWeight.Normal, TextStrong, 1.4f),
+                    style = astaStyle(32.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 1.4f),
                 )
                 SettingsGroup(
                     label = R.string.settings_section_usage,
@@ -143,7 +141,7 @@ private fun SettingsGroup(@StringRes label: Int, items: List<SettingsItem>) {
     Column(verticalArrangement = Arrangement.spacedBy(16.px)) {
         Text(
             text = stringResource(label),
-            style = astaStyle(26.pxSp, FontWeight.SemiBold, TextStrong),
+            style = astaStyle(26.pxSp, FontWeight.SemiBold, PickMeUpColors.TextStrong),
         )
         Column(
             Modifier
@@ -199,7 +197,7 @@ private fun SettingsRow(item: SettingsItem) {
             )
             Text(
                 text = stringResource(item.description),
-                style = astaStyle(26.pxSp, FontWeight.Normal, TextMuted, 1.4f),
+                style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 1.4f),
             )
         }
         Icon(

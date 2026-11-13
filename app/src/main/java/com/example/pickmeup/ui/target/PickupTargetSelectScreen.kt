@@ -50,8 +50,6 @@ import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
 private val Purple = Color(0xFF5A46FA)
-private val TextStrong = Color(0xD6131417)   // rgba(19,20,23,0.84)
-private val TextMuted = Color(0xA3131417)    // rgba(19,20,23,0.64)
 private val CardBorder = Color(0xFFE3E1ED)
 private val AvatarBg = Color(0xFFF9F8FF)
 private val AvatarCircle = Color(0xFFEFEDFF)
@@ -141,7 +139,7 @@ fun PickupTargetSelectScreen(
                 Spacer(Modifier.height(11.px))
                 Text(
                     text = stringResource(R.string.pickup_targets_guide),
-                    style = astaStyle(26.pxSp, FontWeight.Normal, TextStrong, 34f / 26f),
+                    style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(77.px))
@@ -199,7 +197,7 @@ private fun CardFrame(
         Spacer(Modifier.height(19.px))
         Text(
             text = subtitle,
-            style = astaStyle(20.pxSp, FontWeight.Normal, TextMuted, 24f / 20f),
+            style = astaStyle(20.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 24f / 20f),
             textAlign = TextAlign.Center,
             maxLines = 1,
         )

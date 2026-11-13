@@ -51,7 +51,6 @@ import com.example.pickmeup.ui.location.PhoneNumber
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
-private val TextMuted = Color(0xA3131417)    // rgba(19,20,23,0.64)
 private val RowBorder = Color(0xFFE2DFF0)
 private val AvatarCircle = Color(0xFFEFEDFF)
 private val DeleteRed = Color(0xFFFF4C28)
@@ -220,7 +219,7 @@ private fun TargetRow(
             )
             Text(
                 text = PhoneNumber.format(target.phoneDigits),
-                style = astaStyle(24.pxSp, FontWeight.Normal, TextMuted, 28f / 24f),
+                style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 28f / 24f),
             )
         }
         PopupButton(
@@ -255,7 +254,7 @@ private fun EmptyNotice() {
         Spacer(Modifier.height(24.px))
         Text(
             text = stringResource(R.string.pickup_targets_manage_empty_desc),
-            style = astaStyle(24.pxSp, FontWeight.Normal, TextMuted, 28f / 24f),
+            style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 28f / 24f),
             textAlign = TextAlign.Center,
         )
     }
@@ -298,13 +297,13 @@ private fun DeleteConfirmDialog(
             Spacer(Modifier.height(3.px))
             Text(
                 text = PhoneNumber.format(target.phoneDigits),
-                style = astaStyle(24.pxSp, FontWeight.Normal, TextMuted, 28f / 24f),
+                style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 28f / 24f),
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(35.px))
             Text(
                 text = stringResource(R.string.pickup_targets_delete_desc),
-                style = astaStyle(26.pxSp, FontWeight.Normal, TextMuted, 34f / 26f),
+                style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 34f / 26f),
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(41.px))

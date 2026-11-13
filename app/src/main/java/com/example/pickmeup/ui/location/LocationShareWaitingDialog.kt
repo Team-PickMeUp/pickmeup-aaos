@@ -44,7 +44,6 @@ import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
-private val TextStrong = Color(0xD6131417)   // rgba(19,20,23,0.84)
 private val Purple = Color(0xFF5A46FA)
 private val CancelRed = Color(0xFFFF4C28)
 
@@ -74,7 +73,7 @@ internal fun LocationShareWaitingDialog(onCancel: () -> Unit) {
             )
             Text(
                 text = stringResource(R.string.waiting_desc),
-                style = astaStyle(24.pxSp, FontWeight.Normal, TextStrong, 28f / 24f),
+                style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 28f / 24f),
                 textAlign = TextAlign.Center,
             )
             LoadingSpinner()

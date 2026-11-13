@@ -54,8 +54,6 @@ import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
-private val TextStrong = Color(0xD6131417)   // rgba(19,20,23,0.84)
-private val Placeholder = Color(0xA3131417)  // rgba(19,20,23,0.64)
 private val InputBorder = Color(0xFFDADCE3)
 private val ButtonEnabled = Color(0xFF5A46FA)
 private val ButtonDisabled = Color(0xFFB9B1FC)
@@ -163,7 +161,7 @@ fun LocationRequestScreen(
                     )
                     Text(
                         text = stringResource(R.string.location_request_guide),
-                        style = astaStyle(30.pxSp, FontWeight.Normal, TextStrong, 38f / 30f),
+                        style = astaStyle(30.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 38f / 30f),
                     )
                 }
 
@@ -242,7 +240,7 @@ fun LocationRequestScreen(
                     )
                     Text(
                         text = stringResource(R.string.location_request_privacy_notice),
-                        style = astaStyle(26.pxSp, FontWeight.Normal, TextStrong, 34f / 26f),
+                        style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
                     )
                 }
             }
@@ -304,7 +302,7 @@ private fun LabeledInput(
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     if (value.text.isEmpty()) {
-                        Text(text = placeholder, style = inputStyle.copy(color = Placeholder))
+                        Text(text = placeholder, style = inputStyle.copy(color = PickMeUpColors.TextMuted))
                     }
                     innerTextField()
                 }
@@ -333,7 +331,7 @@ private fun SaveForNextCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> 
                 .size(32.px)
                 .clip(shape)
                 .background(if (checked) ButtonEnabled else Color.White)
-                .then(if (checked) Modifier else Modifier.border(1.5.px, Placeholder, shape)),
+                .then(if (checked) Modifier else Modifier.border(1.5.px, PickMeUpColors.TextMuted, shape)),
             contentAlignment = Alignment.Center,
         ) {
             if (checked) {
@@ -347,7 +345,7 @@ private fun SaveForNextCheckbox(checked: Boolean, onCheckedChange: (Boolean) -> 
         }
         Text(
             text = stringResource(R.string.location_request_save_for_next),
-            style = astaStyle(26.pxSp, FontWeight.Normal, TextStrong, 34f / 26f),
+            style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
         )
     }
 }
