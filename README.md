@@ -50,6 +50,7 @@ app/src/main/java/com/example/pickmeup/
 ├── data/
 │   ├── terms/               # 약관 동의 저장소 (SharedPreferences)
 │   ├── pickup/              # 픽업 저장소 (Fake / Remote)
+│   ├── target/              # 저장된 픽업 대상자 (SharedPreferences, 백업 제외)
 │   └── remote/              # Retrofit API, DTO
 └── ui/
     ├── design/              # Figma px → dp/sp 변환 (기준 너비 1700px)
@@ -57,6 +58,7 @@ app/src/main/java/com/example/pickmeup/
     ├── components/          # 공통 컴포넌트 (헤더, 설정 버튼)
     ├── terms/               # 약관 동의 / 약관 상세
     ├── main/                # 메인
+    ├── target/              # 픽업 불러오기 (저장된 대상자 선택)
     ├── location/            # 위치 요청, 전화번호 검증
     ├── share/               # 공유 결과, 픽업 진행 중
     ├── guide/               # 앱 사용 가이드
