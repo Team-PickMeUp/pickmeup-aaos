@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.pickmeup.data.pickup.PickupRepository
 import com.example.pickmeup.data.target.PickupTargetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,7 @@ data class LocationRequestUiState(
     val phoneDigits: String = "",
     /** "다음 픽업을 위해 대상자 저장" 체크 여부 */
     val saveForNext: Boolean = false,
-    /** 요청 중에는 버튼을 막아 중복 요청 방지 */
+    /** 대상자 응답을 기다리는 중 → 대기 팝업 표시, 버튼 중복 클릭 방지 */
     val isRequesting: Boolean = false,
 ) {
     val canRequest: Boolean
@@ -46,6 +47,9 @@ class LocationRequestViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val isRequesting = MutableStateFlow(false)
+
+    /** 응답을 기다리는 중인 요청 (취소용) */
+    private var requestJob: Job? = null
 
     // 입력값은 SavedStateHandle 에 저장 → 다른 화면에 갔다 와도, 화면 회전 후에도 유지
     val uiState: StateFlow<LocationRequestUiState> = combine(
@@ -77,18 +81,36 @@ class LocationRequestViewModel @Inject constructor(
         val phone = savedStateHandle.get<String>(KEY_PHONE).orEmpty()
         if (isRequesting.value || name.isEmpty() || !PhoneNumber.isValidMobile(phone)) return
 
-        viewModelScope.launch {
-            isRequesting.value = true
-            pickupRepository.requestLocationShare(name, phone)
-                .onSuccess {
-                    if (savedStateHandle.get<Boolean>(KEY_SAVE) == true) {
-                        // 저장 실패는 위치 요청 흐름을 막지 않음 (다음에 다시 저장하면 됨)
-                        targetRepository.save(name, phone)
+        isRequesting.value = true
+        requestJob = viewModelScope.launch {
+            try {
+                pickupRepository.requestLocationShare(name, phone)
+                    .onSuccess {
+                        if (savedStateHandle.get<Boolean>(KEY_SAVE) == true) {
+                            // 저장 실패는 위치 요청 흐름을 막지 않음 (다음에 다시 저장하면 됨)
+                            targetRepository.save(name, phone)
+                        }
+                        _events.send(LocationRequestEvent.ResponseReceived)
                     }
-                    _events.send(LocationRequestEvent.ResponseReceived)
-                }
-                .onFailure { _events.send(LocationRequestEvent.RequestFailed(it)) }
-            isRequesting.value = false
+                    .onFailure { _events.send(LocationRequestEvent.RequestFailed(it)) }
+            } finally {
+                // 응답·실패·취소 어느 경우든 대기 팝업 닫기
+                isRequesting.value = false
+                requestJob = null
+            }
+        }
+    }
+
+    /**
+     * 대기 팝업의 "요청 취소" (또는 뒤로 가기).
+     * 응답 기다리기를 멈추고 서버에 취소를 알림 → 입력값은 그대로 두고 위치 요청 화면에 머묾
+     */
+    fun cancelRequest() {
+        val job = requestJob ?: return
+        job.cancel()
+        viewModelScope.launch {
+            // TODO: 취소 실패 안내 UI (Figma 미정)
+            pickupRepository.cancelLocationRequest()
         }
     }
 
