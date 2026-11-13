@@ -56,17 +56,17 @@ fun TermsDetailScreen(
             ) {
                 Text(
                     text = stringResource(type.intro),
-                    style = astaStyle(32.pxSp, FontWeight.Normal, PickMeUpColors.TextSecondary, 1.4f),
+                    style = astaStyle(32.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 40f / 32f),
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(24.px)) {
                     type.articles.forEach { article ->
                         Text(
                             text = stringResource(article.title),
-                            style = astaStyle(32.pxSp, FontWeight.SemiBold, PickMeUpColors.TextPrimary),
+                            style = astaStyle(32.pxSp, FontWeight.SemiBold, PickMeUpColors.TextPrimary, 40f / 32f),
                         )
                         Text(
                             text = stringResource(article.body),
-                            style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextSecondary, 1.6f),
+                            style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
                         )
                     }
                 }

@@ -46,11 +46,18 @@ import com.example.pickmeup.ui.theme.astaStyle
 /** 약관 조항: 제목 + 본문 */
 data class TermsArticle(@StringRes val title: Int, @StringRes val body: Int)
 
-// Figma 약관 상세 화면의 예시 조항 (위치기반서비스·개인정보 화면 모두 같은 문구가 들어 있음)
-private val FigmaSampleArticles = listOf(
-    TermsArticle(R.string.terms_sample_article1_title, R.string.terms_sample_article1_body),
-    TermsArticle(R.string.terms_sample_article2_title, R.string.terms_sample_article2_body),
-    TermsArticle(R.string.terms_sample_article3_title, R.string.terms_sample_article3_body),
+/** 위치기반서비스 이용약관 (Figma 2-2-1 예시 문구) */
+private val LocationArticles = listOf(
+    TermsArticle(R.string.terms_location_article1_title, R.string.terms_location_article1_body),
+    TermsArticle(R.string.terms_location_article2_title, R.string.terms_location_article2_body),
+    TermsArticle(R.string.terms_location_article3_title, R.string.terms_location_article3_body),
+)
+
+/** 개인정보 처리방침 (Figma 2-2-3 "원문 등록 예정" 안내) */
+private val PrivacyArticles = listOf(
+    TermsArticle(R.string.terms_privacy_article1_title, R.string.terms_privacy_article1_body),
+    TermsArticle(R.string.terms_privacy_article2_title, R.string.terms_privacy_article2_body),
+    TermsArticle(R.string.terms_privacy_article3_title, R.string.terms_privacy_article3_body),
 )
 
 /**
@@ -74,13 +81,13 @@ enum class TermsType(
         R.string.terms_privacy_title,
         R.string.terms_privacy_desc,
         R.string.terms_privacy_intro,
-        FigmaSampleArticles,
+        PrivacyArticles,
     ),
     Location(
         R.string.terms_location_title,
         R.string.terms_location_desc,
         R.string.terms_location_intro,
-        FigmaSampleArticles,
+        LocationArticles,
     ),
 }
 
@@ -143,7 +150,7 @@ fun TermsAgreementScreen(
                 Spacer(Modifier.size(width = 50.px, height = 80.px))
                 Text(
                     text = stringResource(R.string.terms_screen_title),
-                    style = astaStyle(52.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary),
+                    style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 40f),
                 )
             }
 
@@ -158,11 +165,11 @@ fun TermsAgreementScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(16.px)) {
                     Text(
                         text = stringResource(R.string.terms_guide),
-                        style = astaStyle(32.pxSp, FontWeight.Normal, PickMeUpColors.TextSecondary, 1.4f),
+                        style = astaStyle(30.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 38f / 30f),
                     )
                     Text(
                         text = stringResource(R.string.terms_guide_sub),
-                        style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextSecondary, 1.5f),
+                        style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 34f / 26f),
                     )
                 }
 
@@ -194,12 +201,8 @@ fun TermsAgreementScreen(
                         CheckMark(checked = allChecked)
                         Text(
                             text = stringResource(R.string.terms_agree_all),
-                            style = astaStyle(28.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary),
+                            style = astaStyle(32.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 40f / 32f),
                             modifier = Modifier.weight(1f),
-                        )
-                        Text(
-                            text = stringResource(R.string.terms_agree_all_optional),
-                            style = astaStyle(22.pxSp, FontWeight.SemiBold, PickMeUpColors.TextSecondary),
                         )
                     }
 
@@ -225,7 +228,7 @@ fun TermsAgreementScreen(
 
                     Text(
                         text = stringResource(R.string.terms_footnote),
-                        style = astaStyle(22.pxSp, FontWeight.Normal, PickMeUpColors.TextSecondary, 1.5f),
+                        style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 28f / 24f),
                     )
                 }
             }
@@ -261,11 +264,11 @@ private fun TermsItemCard(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.px)) {
                 Text(
                     text = stringResource(type.title),
-                    style = astaStyle(28.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary),
+                    style = astaStyle(32.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 40f / 32f),
                 )
                 Text(
                     text = stringResource(type.description),
-                    style = astaStyle(22.pxSp, FontWeight.Normal, PickMeUpColors.TextSecondary, 1.5f),
+                    style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
                 )
             }
             Box(
@@ -276,7 +279,7 @@ private fun TermsItemCard(
             ) {
                 Text(
                     text = stringResource(R.string.terms_required),
-                    style = astaStyle(20.pxSp, FontWeight.Bold, PickMeUpColors.TextDisabled),
+                    style = astaStyle(20.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 24f / 20f),
                 )
             }
         }
@@ -288,7 +291,7 @@ private fun TermsItemCard(
         ) {
             Text(
                 text = stringResource(R.string.terms_view_detail),
-                style = astaStyle(22.pxSp, FontWeight.SemiBold, PickMeUpColors.TextPrimary),
+                style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextPrimary, 28f / 24f),
             )
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_right),
@@ -354,9 +357,10 @@ private fun ActionButton(
         Text(
             text = text,
             style = astaStyle(
-                28.pxSp,
+                32.pxSp,
                 FontWeight.Bold,
-                if (whiteStyle) Color.Black else PickMeUpColors.TextDisabled,
+                if (whiteStyle) PickMeUpColors.TextPrimary else PickMeUpColors.TextFaint,
+                40f / 32f,
             ),
         )
     }
