@@ -55,7 +55,7 @@ fun ScreenHeader(
         }
         Text(
             text = title,
-            style = astaStyle(52.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary),
+            style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 40f),
         )
     }
 }

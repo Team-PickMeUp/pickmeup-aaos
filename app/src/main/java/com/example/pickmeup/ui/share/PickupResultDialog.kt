@@ -37,7 +37,6 @@ import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
-private val TextStrong = Color(0xD6131417)   // rgba(19,20,23,0.84)
 private val Purple = Color(0xFF5A46FA)
 private val CancelledCircle = Color(0x1AFF4C28) // #FF4C28 10%
 private val CompletedCircle = Color(0xFFF0EDFF)
@@ -103,7 +102,7 @@ internal fun PickupResultDialog(result: PickupResult, onConfirm: () -> Unit) {
             Spacer(Modifier.height(11.px))
             Text(
                 text = stringResource(content.description),
-                style = astaStyle(26.pxSp, FontWeight.Normal, TextStrong, 34f / 26f),
+                style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(57.px))
