@@ -148,6 +148,7 @@ fun PickMeUpNavHost(
                 onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
                 onPickupTargetClick = showComingSoon, // TODO: 픽업 대상자 지정 화면 (Figma 미정)
                 onLocationTermsClick = { navController.navigate(TermsDetailDestination(TermsType.Location)) },
+                onServiceTermsClick = { navController.navigate(TermsDetailDestination(TermsType.Service)) },
                 onPrivacyPolicyClick = { navController.navigate(TermsDetailDestination(TermsType.Privacy)) },
             )
         }
