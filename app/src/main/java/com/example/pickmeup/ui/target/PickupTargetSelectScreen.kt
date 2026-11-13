@@ -304,9 +304,9 @@ private fun ViewAllButton(onClick: () -> Unit) {
 private fun PickupTargetSelectPreview() {
     PickupTargetSelectScreen(
         targets = listOf(
-            PickupTarget("김민수", "01012345678", 3),
-            PickupTarget("이서연", "01012345678", 2),
-            PickupTarget("박지훈", "01012345678", 1),
+            PickupTarget("1", "김민수", "01012345678", 3),
+            PickupTarget("2", "이서연", "01012345678", 2),
+            PickupTarget("3", "박지훈", "01012345678", 1),
         ),
         onBack = {}, onAppGuideClick = {}, onSettingsClick = {},
         onTargetSelected = {}, onManualInputClick = {}, onViewAllClick = {},

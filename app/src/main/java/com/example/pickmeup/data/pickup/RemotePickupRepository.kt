@@ -4,8 +4,8 @@ import com.example.pickmeup.data.remote.PickupApi
 import com.example.pickmeup.data.remote.dto.CreateLocationRequestBody
 import com.example.pickmeup.data.remote.dto.LocationRequestResponse
 import com.example.pickmeup.data.remote.dto.LocationRequestStatus
+import com.example.pickmeup.data.runSuspendCatching
 import com.example.pickmeup.model.LocationShareResult
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -80,13 +80,4 @@ class RemotePickupRepository @Inject constructor(
         val POLL_INTERVAL = 3.seconds
         val RESPONSE_TIMEOUT = 5.minutes
     }
-}
-
-/** runCatching 과 같지만 코루틴 취소(CancellationException)는 삼키지 않습니다. */
-internal inline fun <T> runSuspendCatching(block: () -> T): Result<T> = try {
-    Result.success(block())
-} catch (e: CancellationException) {
-    throw e
-} catch (e: Exception) {
-    Result.failure(e)
 }
