@@ -1,5 +1,6 @@
 package com.example.pickmeup.ui.share
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,7 +20,9 @@ fun PickupInProgressRoute(
     viewModel: PickupInProgressViewModel = hiltViewModel(),
 ) {
     val isProcessing by viewModel.isProcessing.collectAsStateWithLifecycle()
-    LaunchedEffect(viewModel) { viewModel.finished.collect { onFinished() } }
+    val result by viewModel.result.collectAsStateWithLifecycle()
+    // 결과 팝업이 떠 있으면 뒤로 가기 = 확인 (픽업이 이미 끝나서 이전 화면으로 갈 수 없음)
+    BackHandler(enabled = result != null, onBack = onFinished)
 
     val current = viewModel.location
     if (current == null) {
@@ -29,6 +32,8 @@ fun PickupInProgressRoute(
     }
     PickupInProgressScreen(
         location = current,
+        result = result,
+        onResultConfirm = onFinished,
         enabled = !isProcessing,
         onBack = onBack,
         onSettingsClick = onSettingsClick,
@@ -40,6 +45,7 @@ fun PickupInProgressRoute(
 /**
  * 픽업 진행 중 화면 (Figma 261:15639 "픽업 진행 중 (경유지/목적지 설정 후)").
  * 경유지 또는 목적지로 설정한 뒤 표시되며, 공유받은 위치를 계속 보여줍니다.
+ * 픽업 취소·완료 처리 후 결과 팝업(Figma 8-1, 8-2) → 확인 시 메인으로.
  */
 @Composable
 fun PickupInProgressScreen(
@@ -50,12 +56,15 @@ fun PickupInProgressScreen(
     onCompletePickup: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    result: PickupResult? = null,
+    onResultConfirm: () -> Unit = {},
 ) {
     ShareScreenScaffold(
         title = stringResource(R.string.pickup_progress_title),
         onBack = onBack,
         onSettingsClick = onSettingsClick,
         modifier = modifier,
+        overlay = { result?.let { PickupResultDialog(result = it, onConfirm = onResultConfirm) } },
     ) {
         LocationStatusCard(
             title = stringResource(R.string.pickup_progress_heading),
