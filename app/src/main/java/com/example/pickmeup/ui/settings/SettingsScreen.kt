@@ -33,8 +33,8 @@ import com.example.pickmeup.ui.components.ScreenHeader
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
-import com.example.pickmeup.ui.terms.astaStyle
 import com.example.pickmeup.ui.theme.PickMeUpColors
+import com.example.pickmeup.ui.theme.astaStyle
 
 private val TextStrong = Color(0xD6131417)   // rgba(19,20,23,0.84)
 private val TextMuted = Color(0xA3131417)    // rgba(19,20,23,0.64)

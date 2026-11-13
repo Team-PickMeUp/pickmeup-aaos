@@ -48,10 +48,8 @@ import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
-import com.example.pickmeup.ui.terms.astaStyle
 import com.example.pickmeup.ui.theme.PickMeUpColors
-
-private const val DESIGN_WIDTH_PX = 1700f
+import com.example.pickmeup.ui.theme.astaStyle
 
 private val TextSub = Color(0xFF646771)
 private val Placeholder = Color(0xFF858894)
@@ -115,7 +113,6 @@ fun LocationRequestScreen(
         modifier
             .fillMaxSize()
             .background(PickMeUpColors.BackgroundPrimary),
-        designWidthPx = DESIGN_WIDTH_PX,
     ) {
         Box(Modifier.fillMaxSize()) {
             Column(

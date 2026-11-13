@@ -1,6 +1,5 @@
 package com.example.pickmeup.ui.main
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,11 +32,8 @@ import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
-import com.example.pickmeup.ui.terms.astaStyle
 import com.example.pickmeup.ui.theme.PickMeUpColors
-
-/** Figma "application" 영역 크기 (메인화면 node 18:21224) */
-private const val MAIN_DESIGN_WIDTH_PX = 1700f
+import com.example.pickmeup.ui.theme.astaStyle
 
 private val ButtonPurple = Color(0xFF5A46FA)
 private val ButtonPurpleBorder = Color(0xFF8F80F5)
@@ -59,7 +55,6 @@ fun MainScreen(
         modifier
             .fillMaxSize()
             .background(PickMeUpColors.BackgroundPrimary),
-        designWidthPx = MAIN_DESIGN_WIDTH_PX,
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             SettingsButton(

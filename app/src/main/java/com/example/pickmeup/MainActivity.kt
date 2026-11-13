@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val startWithTerms = !consentRepository.hasAgreedToCurrentTerms()
         setContent {
-            PickMeUpTheme(dynamicColor = false) {
+            PickMeUpTheme {
                 PickMeUpNavHost(
                     startWithTerms = startWithTerms,
                     // 약관에 동의하지 않으면 앱을 시작하지 않고 종료 → 런처로 돌아감

@@ -20,8 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import com.example.pickmeup.R
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
-import com.example.pickmeup.ui.terms.astaStyle
 import com.example.pickmeup.ui.theme.PickMeUpColors
+import com.example.pickmeup.ui.theme.astaStyle
 
 /**
  * 96px 높이 헤더: 80px 뒤로 가기 버튼(48px 왼쪽 화살표) + 52px 굵은 제목.
