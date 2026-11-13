@@ -15,6 +15,7 @@ import com.example.pickmeup.model.LocationShareResult
 @Composable
 fun PickupInProgressRoute(
     onBack: () -> Unit,
+    onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onFinished: () -> Unit,
     viewModel: PickupInProgressViewModel = hiltViewModel(),
@@ -36,6 +37,7 @@ fun PickupInProgressRoute(
         onResultConfirm = onFinished,
         enabled = !isProcessing,
         onBack = onBack,
+        onAppGuideClick = onAppGuideClick,
         onSettingsClick = onSettingsClick,
         onCancelPickup = viewModel::cancelPickup,
         onCompletePickup = viewModel::completePickup,
@@ -51,6 +53,7 @@ fun PickupInProgressRoute(
 fun PickupInProgressScreen(
     location: LocationShareResult.Allowed,
     onBack: () -> Unit,
+    onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onCancelPickup: () -> Unit,
     onCompletePickup: () -> Unit,
@@ -64,6 +67,7 @@ fun PickupInProgressScreen(
         onBack = onBack,
         onSettingsClick = onSettingsClick,
         modifier = modifier,
+        onAppGuideClick = onAppGuideClick,
         overlay = { result?.let { PickupResultDialog(result = it, onConfirm = onResultConfirm) } },
     ) {
         LocationStatusCard(
@@ -93,6 +97,6 @@ fun PickupInProgressScreen(
 private fun PickupInProgressPreview() {
     PickupInProgressScreen(
         location = LocationShareResult.Allowed("홍길동", "00시 00구 00로", 0.0, 0.0),
-        onBack = {}, onSettingsClick = {}, onCancelPickup = {}, onCompletePickup = {},
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onCancelPickup = {}, onCompletePickup = {},
     )
 }

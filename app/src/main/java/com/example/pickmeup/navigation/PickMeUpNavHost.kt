@@ -119,6 +119,7 @@ fun PickMeUpNavHost(
         composable<ShareResultDestination> { entry ->
             LocationShareResultRoute(
                 onBack = navController.backFrom(entry),
+                onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
                 onSettingsClick = { navController.navigateSingle(SettingsDestination) },
                 onPickupStarted = { navController.navigateSingle(PickupInProgressDestination) },
             )
@@ -127,6 +128,7 @@ fun PickMeUpNavHost(
         composable<PickupInProgressDestination> { entry ->
             PickupInProgressRoute(
                 onBack = navController.backFrom(entry),
+                onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
                 onSettingsClick = { navController.navigateSingle(SettingsDestination) },
                 // 픽업 종료: 메인만 남기고 모두 닫음 (메인에서 뒤로 가도 지난 픽업 화면이 안 나옴)
                 onFinished = { navController.popBackStack(MainDestination, inclusive = false) },

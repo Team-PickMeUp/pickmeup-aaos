@@ -14,6 +14,7 @@ import com.example.pickmeup.model.LocationShareResult
 @Composable
 fun LocationShareResultRoute(
     onBack: () -> Unit,
+    onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onPickupStarted: () -> Unit,
     viewModel: ShareResultViewModel = hiltViewModel(),
@@ -30,6 +31,7 @@ fun LocationShareResultRoute(
     LocationShareResultScreen(
         result = current,
         onBack = onBack,
+        onAppGuideClick = onAppGuideClick,
         onSettingsClick = onSettingsClick,
         onSetWaypoint = viewModel::setAsWaypoint,
         onSetDestination = viewModel::setAsDestination,
@@ -45,16 +47,21 @@ fun LocationShareResultRoute(
 fun LocationShareResultScreen(
     result: LocationShareResult,
     onBack: () -> Unit,
+    onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onSetWaypoint: (LocationShareResult.Allowed) -> Unit,
     onSetDestination: (LocationShareResult.Allowed) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isAllowed = result is LocationShareResult.Allowed
     ShareScreenScaffold(
-        title = stringResource(R.string.share_result_title),
+        // 미허용이면 뒤로 가기가 곧 위치 요청으로 돌아가는 것이라 제목도 그렇게 (Figma 6-2-1)
+        title = stringResource(if (isAllowed) R.string.share_result_title else R.string.share_result_denied_title),
         onBack = onBack,
         onSettingsClick = onSettingsClick,
         modifier = modifier,
+        // Figma: 미허용 화면에는 가이드(책) 버튼 없음
+        onAppGuideClick = if (isAllowed) onAppGuideClick else null,
     ) {
         when (result) {
             is LocationShareResult.Allowed -> LocationStatusCard(
@@ -84,7 +91,7 @@ fun LocationShareResultScreen(
 private fun AllowedPreview() {
     LocationShareResultScreen(
         result = LocationShareResult.Allowed("홍길동", "00시 00구 00로", 0.0, 0.0),
-        onBack = {}, onSettingsClick = {}, onSetWaypoint = {}, onSetDestination = {},
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onSetWaypoint = {}, onSetDestination = {},
     )
 }
 
@@ -93,6 +100,6 @@ private fun AllowedPreview() {
 private fun DeniedPreview() {
     LocationShareResultScreen(
         result = LocationShareResult.Denied("홍길동"),
-        onBack = {}, onSettingsClick = {}, onSetWaypoint = {}, onSetDestination = {},
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onSetWaypoint = {}, onSetDestination = {},
     )
 }
