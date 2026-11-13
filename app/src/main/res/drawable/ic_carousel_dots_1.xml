@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma: 캐러셀 인디케이터 1번 활성 (node 62:9370) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="68dp"
+    android:height="16dp"
+    android:viewportWidth="68"
+    android:viewportHeight="16">
+    <path
+        android:fillColor="#FF5A46FA"
+        android:pathData="M0,8a8,8 0,1 0,16,0a8,8 0,1 0,-16,0Z" />
+    <path
+        android:fillAlpha="0.1"
+        android:fillColor="#FF131417"
+        android:pathData="M26,8a8,8 0,1 0,16,0a8,8 0,1 0,-16,0Z" />
+    <path
+        android:fillAlpha="0.1"
+        android:fillColor="#FF131417"
+        android:pathData="M52,8a8,8 0,1 0,16,0a8,8 0,1 0,-16,0Z" />
+</vector>

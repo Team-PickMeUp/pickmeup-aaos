@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 약관 동의 기록은 백업/복원하지 않음: 재설치 시 항상 '미동의' 상태로 시작 -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="terms_consent.xml" />
+</full-backup-content>

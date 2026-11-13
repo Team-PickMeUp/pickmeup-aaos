@@ -1,0 +1,108 @@
+<resources>
+    <string name="app_name">PickMeUp</string>
+
+    <!-- 최초 실행 이용약관 동의 -->
+    <string name="terms_screen_title">픽미업 최초 실행 동의</string>
+    <string name="terms_guide">픽미업을 사용하려면 필수 약관을 모두 동의해야 합니다. 각 항목을 확인한 뒤 전체 동의 여부를 선택해 주세요.</string>
+    <string name="terms_guide_sub">위치기반서비스 이용약관은 픽업 기능 제공을 위한 위치 정보 활용에 대한 동의이며, 운영체제 위치 접근 권한은 이후 별도로 요청됩니다. 동의하지 않으면 픽미업 이용을 시작하지 않고 종료하거나 돌아갈 수 있습니다.</string>
+    <string name="terms_required">필수</string>
+    <string name="terms_view_detail">내용 보기</string>
+    <string name="terms_agree_all">전체 동의</string>
+    <string name="terms_agree_all_optional">선택</string>
+    <string name="terms_agree_and_start">동의하고 시작하기</string>
+    <string name="terms_disagree">동의하지 않음</string>
+    <string name="terms_footnote">모두 동의하기 전에는 시작하기가 비활성 상태입니다. 동의하지 않으면 픽미업 이용을 시작하지 않고 종료하거나 돌아갈 수 있습니다.</string>
+    <string name="terms_back">뒤로 가기</string>
+
+    <string name="terms_service_title">서비스 이용약관</string>
+    <string name="terms_service_desc">앱 전반의 사용 규칙, 이용 제한, 책임 소재, 서비스 중단 기준 등 이용에 필요한 내용을 확인합니다.</string>
+    <string name="terms_privacy_title">개인정보 처리방침</string>
+    <string name="terms_privacy_desc">픽업 대상자의 연락처, 위치, 기기 정보 등 수집되는 개인정보의 항목과 이용 목적을 확인합니다.</string>
+    <string name="terms_location_title">위치기반서비스 이용약관</string>
+    <string name="terms_location_desc">운전자와 픽업 대상자의 위치 정보를 활용하여 픽업 기능을 제공하는 데 동의합니다. 운영체제 위치 접근 권한은 이후 별도로 요청됩니다.</string>
+
+    <!-- 약관 상세 (Figma 136:14057 위치기반서비스 이용약관 / 136:15187 개인정보 처리방침) -->
+    <!-- TODO: 법무 검토된 약관 전문으로 교체. 아래 조항은 Figma의 예시 문구입니다. -->
+    <string name="terms_service_intro">서비스 이용약관을 확인하고, 서비스 이용에 필요한 정보를 확인하세요.</string>
+    <string name="terms_location_intro">위치기반서비스 이용약관을 확인하고, 서비스 이용에 필요한 정보를 확인하세요.</string>
+    <string name="terms_privacy_intro">개인정보 처리방침을 확인하고, 서비스 이용에 필요한 정보를 확인하세요.</string>
+    <string name="terms_service_placeholder_title">제 1조 (목적)</string>
+    <string name="terms_service_placeholder_body">(서비스 이용약관 전문이 여기에 표시됩니다. Figma에 이 약관 화면 디자인과 문구가 없습니다.)</string>
+    <string name="terms_sample_article1_title">제 1조 (목적)</string>
+    <string name="terms_sample_article1_body">본 약관은 위치기반서비스 제공자(이하 \"서비스 제공자\")가 제공하는 위치기반서비스(이하 \"서비스\")의 이용과 관련하여 서비스 제공자와 이용자의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.</string>
+    <string name="terms_sample_article2_title">제 2조 (용어의 정의)</string>
+    <string name="terms_sample_article2_body">본 약관에서 사용하는 용어의 정의는 다음과 같습니다. 1. \"이용자\"라 함은 본 약관을 승인하고 서비스를 이용하는 자를 말합니다. 2. \"개인위치정보\"라 함은 이동전화기 등의 단말기 기기 또는 이용자의 위치를 확인할 수 있는 장치를 통하여 이용자의 위치를 확인할 수 있는 정보를 말합니다. 3. \"위치기반서비스\"라 함은 이용자의 위치정보를 이용하여 정보를 제공하는 서비스를 말합니다.</string>
+    <string name="terms_sample_article3_title">제 3조 (약관의 게시와 개정)</string>
+    <string name="terms_sample_article3_body">서비스 제공자는 본 약관의 내용을 이용자가 쉽게 알 수 있도록 서비스 초기 화면 또는 연결화면을 통하여 게시합니다. 서비스 제공자는 법률의 규정에 의하여 필요하거나 이용자의 권익을 보호하기 위하여 필요한 경우에는 약관을 개정할 수 있으며, 개정된 약관은 적용일자 이후에 가입한 이용자에 대하여는 그 적용을 요구할 수 있습니다.</string>
+
+    <!-- 메인 화면 -->
+    <string name="main_greeting">오늘은 어떤 분을 픽업해볼까요?</string>
+    <string name="main_request_location">위치 요청하기</string>
+    <string name="main_app_guide">앱 사용가이드</string>
+    <string name="main_settings">설정</string>
+    <!-- 위치 요청 화면 -->
+    <string name="location_request_title">위치 요청</string>
+    <string name="location_request_guide">새로운 대상자의 정보를 입력하거나, 저장된 대상자를 선택해 주세요.</string>
+    <string name="location_request_new_target">새 픽업 대상자</string>
+    <string name="location_request_name_label">이름</string>
+    <string name="location_request_name_hint">픽업 대상자의 이름을 입력해 주세요</string>
+    <string name="location_request_phone_label">전화번호</string>
+    <string name="location_request_phone_hint">010-0000-0000</string>
+    <string name="location_request_button">위치요청하기</string>
+    <string name="location_request_privacy_notice">상대방이 위치 공유에 동의한 후에만 위치를 확인할 수 있어요.</string>
+    <!-- 위치 공유 결과: 경유지 / 목적지 선택 (Figma 130:11560 허용, 133:12536 미허용) -->
+    <string name="share_result_title">경유지 / 목적지 선택</string>
+    <string name="share_result_allowed">픽업 대상자가 위치 공유를 허용했어요.</string>
+    <string name="share_result_location">위치 : %1$s</string>
+    <string name="share_result_question">경유지 또는 목적지로 설정할까요?</string>
+    <string name="share_result_set_waypoint">경유지로 설정하기</string>
+    <string name="share_result_set_destination">목적지로 설정하기</string>
+    <string name="share_result_denied">픽업 대상자가 위치공유를 허용하지 않았어요.</string>
+
+    <!-- 픽업 진행 중 (Figma 261:15639) -->
+    <string name="pickup_progress_title">픽업 진행 중</string>
+    <string name="pickup_progress_heading">픽업하러 가는 중이에요.</string>
+    <string name="pickup_progress_guide">도착하면 픽업 완료를 눌러주세요.</string>
+    <string name="pickup_cancel">픽업 취소하기</string>
+    <string name="pickup_complete">픽업 완료하기</string>
+
+    <!-- 설정 (Figma 37:9324) -->
+    <string name="settings_title">설정</string>
+    <string name="settings_intro">앱 이용 안내와 약관을 확인할 수 있어요.</string>
+    <string name="settings_section_usage">이용 안내</string>
+    <string name="settings_guide_title">앱 사용 가이드</string>
+    <string name="settings_guide_desc">위치 요청 기능과 이용 방법을 알아보세요.</string>
+    <string name="settings_section_pickup">픽업 설정</string>
+    <string name="settings_target_title">픽업 대상자 지정</string>
+    <string name="settings_target_desc">픽업 대상자를 지정하고 기본 설정을 관리하세요.</string>
+    <string name="settings_section_terms">약관 및 개인정보</string>
+    <string name="settings_location_terms_desc">위치기반서비스 이용에 관한 약관을 확인하세요.</string>
+    <string name="settings_privacy_desc">개인정보 처리에 관한 안내를 확인하세요.</string>
+
+    <!-- 앱 사용 가이드 -->
+    <string name="guide_title">앱 사용 가이드</string>
+    <string name="guide_step1_badge">1단계</string>
+    <string name="guide_step1_badge_label">위치요청하기</string>
+    <string name="guide_step1_head1">위치요청하기 버튼을 누르거나 gleo에게 요청하세요</string>
+    <string name="guide_step1_body1">위치요청하기 버튼을 누르거나 gleo에게 요청하면, 위치 요청이 가능해요. 픽업 대상자의 이름과 전화번호를 말씀해주세요.</string>
+    <string name="guide_step1_example_label">예시)</string>
+    <string name="guide_step1_example">픽업대상자 이름은 홍길동, 전화번호는 010-1234-5678이야.</string>
+    <string name="guide_step1_head2">스마트폰을 Pleos Connect에 연결해주세요</string>
+    <string name="guide_step1_body2">SMS 문자메시지 기반으로 연락이 가요. 그래서 반드시 스마트폰을 Pleos Connect에 연결해주세요.</string>
+    <string name="guide_step2_badge">2단계</string>
+    <string name="guide_step2_badge_label">문자메시지 전송</string>
+    <string name="guide_step2_head">위치요청하기 버튼을 누르면 픽업 대상자에게 문자메시지가 전송돼요</string>
+    <string name="guide_step2_sms">픽업을 위한 위치공유 요청이 왔어요. 위치 공유를 하시려면 아래 링크를 클릭해주세요.\n{링크}\n본인이 아니라면, 해당 문자메시지를 무시해주세요.</string>
+    <string name="guide_step3_badge">3단계</string>
+    <string name="guide_step3_badge_label">위치 공유 시작</string>
+    <string name="guide_step3_head">픽업 대상자가 위치 공유를 허용하면 위치 공유가 시작돼요</string>
+    <string name="guide_step3_body">1. 운전자님께서는 픽업 대상자의 위치를 공유받아 경유지나 목적지로 추가할 수 있어요.</string>
+    <string name="guide_step3_card_title">픽업 대상자가 위치 공유를 허용했어요.</string>
+    <string name="guide_step3_card_location">위치 : 00시 00구 00로</string>
+    <string name="guide_step3_card_question">경유지 또는 목적지로 설정할까요?</string>
+    <string name="guide_step3_waypoint">경유지로 설정하기</string>
+    <string name="guide_step3_destination">목적지로 설정하기</string>
+    <string name="guide_page_description">%1$d / %2$d 페이지</string>
+    <string name="common_back">뒤로 가기</string>
+    <string name="coming_soon">준비 중인 화면이에요</string>
+</resources>

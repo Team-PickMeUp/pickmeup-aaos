@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma: ic_arrow / direction=right (node 15:6302) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#FF131417"
+        android:fillType="evenOdd"
+        android:pathData="M15.5858 8.58579C16.3668 7.80474 17.6332 7.80474 18.4142 8.58579L32.4142 22.5858C33.1953 23.3668 33.1953 24.6332 32.4142 25.4142L18.4142 39.4142C17.6332 40.1953 16.3668 40.1953 15.5858 39.4142C14.8047 38.6332 14.8047 37.3668 15.5858 36.5858L28.1716 24L15.5858 11.4142C14.8047 10.6332 14.8047 9.36683 15.5858 8.58579Z" />
+</vector>
