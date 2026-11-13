@@ -1,7 +1,7 @@
 ---
 name: 기능 요청
 about: 새 기능이나 화면 작업
-title: "[Feat] "
+title: "✨ feat: "
 labels: enhancement
 ---
 

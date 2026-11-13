@@ -1,7 +1,7 @@
 ---
 name: 버그 제보
 about: 잘못 동작하는 부분 제보
-title: "[Bug] "
+title: "🐛 fix: "
 labels: bug
 ---
 
