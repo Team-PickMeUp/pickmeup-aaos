@@ -1,6 +1,8 @@
 package com.example.pickmeup.di
 
 import com.example.pickmeup.BuildConfig
+import com.example.pickmeup.data.message.FakePickupMessageRepository
+import com.example.pickmeup.data.message.PickupMessageRepository
 import com.example.pickmeup.data.pickup.FakePickupRepository
 import com.example.pickmeup.data.pickup.PickupRepository
 import com.example.pickmeup.data.pickup.RemotePickupRepository
@@ -25,6 +27,10 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindPickupTargetRepository(impl: LocalPickupTargetRepository): PickupTargetRepository
+
+    /** TODO: 서버 연동 시 실시간 수신 구현으로 교체 (지금은 2초 간격 가짜 메시지) */
+    @Binds
+    abstract fun bindPickupMessageRepository(impl: FakePickupMessageRepository): PickupMessageRepository
 
     companion object {
         /** 서버 준비 전에는 가짜 저장소 사용 (app/build.gradle.kts 의 USE_FAKE_API 참고) */
