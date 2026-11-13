@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 약관 동의 기록은 백업/복원하지 않음: 재설치 시 항상 '미동의' 상태로 시작 -->
+<!--
+  백업/복원 제외
+  - 약관 동의 기록: 재설치 시 항상 '미동의' 상태로 시작
+  - 저장된 픽업 대상자: 제3자 개인정보(이름, 전화번호)
+-->
 <full-backup-content>
     <exclude domain="sharedpref" path="terms_consent.xml" />
+    <exclude domain="sharedpref" path="pickup_targets.xml" />
 </full-backup-content>

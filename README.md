@@ -36,7 +36,7 @@ Screen (Compose) ── 이벤트 ──▶ ViewModel ──▶ Repository ─�
 
 - 상태 없는 화면(메인, 가이드, 설정, 약관 상세)은 ViewModel 없이 `Screen`만 존재
 - 일회성 이벤트(화면 이동 등)는 ViewModel의 `Channel`로 전달
-- 새 화면 추가: `Routes.kt`에 경로 추가 → `PickMeUpNavHost.kt`에 `composable` 등록
+- 새 화면 추가: `Destinations.kt`에 경로(`XxxDestination`) 추가 → `PickMeUpNavHost.kt`에 `composable` 등록
 
 ## 프로젝트 구조
 
@@ -44,12 +44,13 @@ Screen (Compose) ── 이벤트 ──▶ ViewModel ──▶ Repository ─�
 app/src/main/java/com/example/pickmeup/
 ├── PickMeUpApplication.kt   # Hilt 시작점
 ├── MainActivity.kt          # 약관 동의 여부로 시작 화면 결정
-├── navigation/              # 화면 경로(Routes), NavHost
+├── navigation/              # 화면 경로(Destinations), NavHost
 ├── di/                      # Hilt 모듈 (네트워크, 저장소 연결)
 ├── model/                   # 화면·데이터 계층 공용 모델
 ├── data/
 │   ├── terms/               # 약관 동의 저장소 (SharedPreferences)
 │   ├── pickup/              # 픽업 저장소 (Fake / Remote)
+│   ├── target/              # 저장된 픽업 대상자 (SharedPreferences, 백업 제외)
 │   └── remote/              # Retrofit API, DTO
 └── ui/
     ├── design/              # Figma px → dp/sp 변환 (기준 너비 1700px)
@@ -57,6 +58,7 @@ app/src/main/java/com/example/pickmeup/
     ├── components/          # 공통 컴포넌트 (헤더, 설정 버튼)
     ├── terms/               # 약관 동의 / 약관 상세
     ├── main/                # 메인
+    ├── target/              # 픽업 불러오기 (저장된 대상자 선택)
     ├── location/            # 위치 요청, 전화번호 검증
     ├── share/               # 공유 결과, 픽업 진행 중
     ├── guide/               # 앱 사용 가이드

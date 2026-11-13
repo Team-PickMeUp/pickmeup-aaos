@@ -21,6 +21,7 @@ import com.example.pickmeup.ui.main.MainScreen
 import com.example.pickmeup.ui.settings.SettingsScreen
 import com.example.pickmeup.ui.share.LocationShareResultRoute
 import com.example.pickmeup.ui.share.PickupInProgressRoute
+import com.example.pickmeup.ui.target.PickupTargetSelectRoute
 import com.example.pickmeup.ui.terms.TermsAgreementRoute
 import com.example.pickmeup.ui.terms.TermsDetailScreen
 import com.example.pickmeup.ui.terms.TermsType
@@ -45,7 +46,7 @@ fun PickMeUpNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = if (startWithTerms) TermsAgreementRoute else MainRoute,
+        startDestination = if (startWithTerms) TermsAgreementDestination else MainDestination,
         modifier = modifier,
         // 차량 화면: 전환 애니메이션 없이 바로 바뀜
         enterTransition = { EnterTransition.None },
@@ -53,73 +54,86 @@ fun PickMeUpNavHost(
         popEnterTransition = { EnterTransition.None },
         popExitTransition = { ExitTransition.None },
     ) {
-        composable<TermsAgreementRoute> {
+        composable<TermsAgreementDestination> {
             TermsAgreementRoute(
                 onAgreed = {
-                    navController.navigate(MainRoute) {
-                        popUpTo<TermsAgreementRoute> { inclusive = true }
+                    navController.navigate(MainDestination) {
+                        popUpTo<TermsAgreementDestination> { inclusive = true }
                     }
                 },
                 onDisagree = onExit,
-                onViewDetail = { navController.navigate(TermsDetailRoute(it)) },
+                onViewDetail = { navController.navigate(TermsDetailDestination(it)) },
             )
         }
 
-        composable<TermsDetailRoute> { entry ->
+        composable<TermsDetailDestination> { entry ->
             TermsDetailScreen(
-                type = entry.toRoute<TermsDetailRoute>().type,
+                type = entry.toRoute<TermsDetailDestination>().type,
                 onBack = navController.backFrom(entry),
             )
         }
 
-        composable<MainRoute> {
+        composable<MainDestination> {
             MainScreen(
-                onSettingsClick = { navController.navigateSingle(SettingsRoute) },
-                onAppGuideClick = { navController.navigateSingle(AppGuideRoute) },
-                onRequestLocationClick = { navController.navigateSingle(LocationRequestRoute) },
-                onLoadPickupTargetsClick = showComingSoon, // TODO: 2-1 프로필 불러오는 화면 (별도 이슈)
+                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
+                onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
+                onRequestLocationClick = { navController.navigateSingle(LocationRequestDestination()) },
+                onLoadPickupTargetsClick = { navController.navigateSingle(PickupTargetSelectDestination) },
             )
         }
 
-        composable<LocationRequestRoute> { entry ->
+        composable<PickupTargetSelectDestination> { entry ->
+            PickupTargetSelectRoute(
+                onBack = navController.backFrom(entry),
+                onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
+                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
+                onTargetSelected = { target ->
+                    navController.navigate(LocationRequestDestination(target.name, target.phoneDigits))
+                },
+                onManualInputClick = { navController.navigate(LocationRequestDestination()) },
+                onViewAllClick = showComingSoon, // TODO: 2-1-1 전체 프로필 관리 (별도 이슈)
+            )
+        }
+
+        composable<LocationRequestDestination> { entry ->
             LocationRequestRoute(
                 onBack = navController.backFrom(entry),
-                onSettingsClick = { navController.navigateSingle(SettingsRoute) },
-                onResponseReceived = { navController.navigateSingle(ShareResultRoute) },
+                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
+                onResponseReceived = { navController.navigateSingle(ShareResultDestination) },
             )
         }
 
-        composable<ShareResultRoute> { entry ->
+        composable<ShareResultDestination> { entry ->
             LocationShareResultRoute(
                 onBack = navController.backFrom(entry),
-                onSettingsClick = { navController.navigateSingle(SettingsRoute) },
-                onPickupStarted = { navController.navigateSingle(PickupInProgressRoute) },
+                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
+                onPickupStarted = { navController.navigateSingle(PickupInProgressDestination) },
             )
         }
 
-        composable<PickupInProgressRoute> { entry ->
+        composable<PickupInProgressDestination> { entry ->
             PickupInProgressRoute(
                 onBack = navController.backFrom(entry),
-                onSettingsClick = { navController.navigateSingle(SettingsRoute) },
+                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
                 // 픽업 종료: 메인만 남기고 모두 닫음 (메인에서 뒤로 가도 지난 픽업 화면이 안 나옴)
-                onFinished = { navController.popBackStack(MainRoute, inclusive = false) },
+                onFinished = { navController.popBackStack(MainDestination, inclusive = false) },
             )
         }
 
-        composable<AppGuideRoute> { entry ->
+        composable<AppGuideDestination> { entry ->
             AppGuideScreen(
                 onBack = navController.backFrom(entry),
-                onSettingsClick = { navController.navigateSingle(SettingsRoute) },
+                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
             )
         }
 
-        composable<SettingsRoute> { entry ->
+        composable<SettingsDestination> { entry ->
             SettingsScreen(
                 onBack = navController.backFrom(entry),
-                onAppGuideClick = { navController.navigateSingle(AppGuideRoute) },
+                onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
                 onPickupTargetClick = showComingSoon, // TODO: 픽업 대상자 지정 화면 (Figma 미정)
-                onLocationTermsClick = { navController.navigate(TermsDetailRoute(TermsType.Location)) },
-                onPrivacyPolicyClick = { navController.navigate(TermsDetailRoute(TermsType.Privacy)) },
+                onLocationTermsClick = { navController.navigate(TermsDetailDestination(TermsType.Location)) },
+                onPrivacyPolicyClick = { navController.navigate(TermsDetailDestination(TermsType.Privacy)) },
             )
         }
     }
