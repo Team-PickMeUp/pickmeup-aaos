@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickmeup.data.pickup.PickupRepository
+import com.example.pickmeup.data.target.PickupTargetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +21,8 @@ data class LocationRequestUiState(
     val name: String = "",
     /** 숫자만 저장 (화면에는 하이픈 넣어서 표시) */
     val phoneDigits: String = "",
+    /** "다음 픽업을 위해 대상자 저장" 체크 여부 */
+    val saveForNext: Boolean = false,
     /** 요청 중에는 버튼을 막아 중복 요청 방지 */
     val isRequesting: Boolean = false,
 ) {
@@ -39,6 +42,7 @@ sealed interface LocationRequestEvent {
 class LocationRequestViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val pickupRepository: PickupRepository,
+    private val targetRepository: PickupTargetRepository,
 ) : ViewModel() {
 
     private val isRequesting = MutableStateFlow(false)
@@ -47,9 +51,10 @@ class LocationRequestViewModel @Inject constructor(
     val uiState: StateFlow<LocationRequestUiState> = combine(
         savedStateHandle.getStateFlow(KEY_NAME, ""),
         savedStateHandle.getStateFlow(KEY_PHONE, ""),
+        savedStateHandle.getStateFlow(KEY_SAVE, false),
         isRequesting,
-    ) { name, phone, requesting ->
-        LocationRequestUiState(name, phone, requesting)
+    ) { name, phone, save, requesting ->
+        LocationRequestUiState(name, phone, save, requesting)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, LocationRequestUiState())
 
     private val _events = Channel<LocationRequestEvent>(Channel.BUFFERED)
@@ -63,6 +68,10 @@ class LocationRequestViewModel @Inject constructor(
         savedStateHandle[KEY_PHONE] = PhoneNumber.digitsOf(input)
     }
 
+    fun onSaveForNextChange(checked: Boolean) {
+        savedStateHandle[KEY_SAVE] = checked
+    }
+
     fun requestLocation() {
         val name = savedStateHandle.get<String>(KEY_NAME).orEmpty().trim()
         val phone = savedStateHandle.get<String>(KEY_PHONE).orEmpty()
@@ -71,7 +80,13 @@ class LocationRequestViewModel @Inject constructor(
         viewModelScope.launch {
             isRequesting.value = true
             pickupRepository.requestLocationShare(name, phone)
-                .onSuccess { _events.send(LocationRequestEvent.ResponseReceived) }
+                .onSuccess {
+                    if (savedStateHandle.get<Boolean>(KEY_SAVE) == true) {
+                        // 저장 실패는 위치 요청 흐름을 막지 않음 (다음에 다시 저장하면 됨)
+                        targetRepository.save(name, phone)
+                    }
+                    _events.send(LocationRequestEvent.ResponseReceived)
+                }
                 .onFailure { _events.send(LocationRequestEvent.RequestFailed(it)) }
             isRequesting.value = false
         }
@@ -80,5 +95,6 @@ class LocationRequestViewModel @Inject constructor(
     private companion object {
         const val KEY_NAME = "name"
         const val KEY_PHONE = "phoneDigits"
+        const val KEY_SAVE = "saveForNext"
     }
 }

@@ -98,6 +98,7 @@ fun PickMeUpNavHost(
         composable<LocationRequestDestination> { entry ->
             LocationRequestRoute(
                 onBack = navController.backFrom(entry),
+                onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
                 onSettingsClick = { navController.navigateSingle(SettingsDestination) },
                 onResponseReceived = { navController.navigateSingle(ShareResultDestination) },
             )
