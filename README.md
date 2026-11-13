@@ -8,7 +8,11 @@
 |---|---|
 | 언어 | Kotlin 2.2 |
 | UI | Jetpack Compose (BOM 2026.02.01), Material3 |
-| 빌드 | AGP 9.5, Gradle Version Catalog |
+| 아키텍처 | MVVM (ViewModel + StateFlow), 단방향 데이터 흐름 |
+| DI | Hilt |
+| 화면 이동 | Navigation Compose (type-safe route) |
+| 네트워크 | Retrofit 3, OkHttp 5, kotlinx.serialization |
+| 빌드 | AGP 9.5, Gradle Version Catalog, KSP |
 | 플랫폼 | Android Automotive OS, minSdk 34 / targetSdk 37 |
 | 디자인 | [Figma 와이어프레임](https://www.figma.com/design/ViO6HZxZ5M1Vc2ulAEdzDF) |
 
@@ -23,6 +27,15 @@
 ./gradlew testDebugUnitTest # 단위 테스트
 ```
 
+### API 설정 (`local.properties`)
+
+| 키 | 기본값 | 설명 |
+|---|---|---|
+| `pickmeup.api.useFake` | `true` | `true`면 가짜 저장소 사용 (위치 요청이 항상 즉시 '허용') |
+| `pickmeup.api.baseUrl` | `http://10.0.2.2:8080/` | API 주소. 기본값은 에뮬레이터에서 본 PC의 `localhost:8080` |
+
+debug 빌드에서만 `10.0.2.2`, `localhost`로 http(비암호화) 접속이 허용됩니다.
+
 ### Pleos 에뮬레이터 참고사항
 
 - 앱은 **사용자 10**으로 실행됩니다. 데이터 초기화(약관 미동의 상태로 되돌리기)는:
@@ -36,8 +49,15 @@
 
 ```
 app/src/main/java/com/example/pickmeup/
-├── MainActivity.kt          # 약관 동의 여부 분기 + 화면 이동(back stack)
-├── data/                    # 약관 동의 저장소 (SharedPreferences)
+├── PickMeUpApplication.kt   # Hilt 시작점
+├── MainActivity.kt          # 약관 동의 여부로 시작 화면 결정
+├── navigation/              # 화면 경로(Routes), NavHost
+├── di/                      # Hilt 모듈 (네트워크, 저장소 연결)
+├── model/                   # 화면·데이터 계층이 같이 쓰는 모델
+├── data/
+│   ├── terms/               # 약관 동의 저장소 (SharedPreferences)
+│   ├── pickup/              # 픽업 저장소 (Fake / Remote)
+│   └── remote/              # Retrofit API, DTO
 └── ui/
     ├── design/              # Figma px → dp/sp 변환 (LocalPxScale, 기준 너비 1700px)
     ├── theme/               # 색상, 폰트(Asta Sans)
@@ -49,6 +69,25 @@ app/src/main/java/com/example/pickmeup/
     ├── guide/               # 앱 사용 가이드
     └── settings/            # 설정
 ```
+
+### 아키텍처 (MVVM)
+
+```
+Screen (Compose) ── 이벤트 ──▶ ViewModel ──▶ Repository ──▶ API / SharedPreferences
+       ▲                          │
+       └──── UiState (StateFlow) ─┘
+```
+
+| 계층 | 역할 | 예시 |
+|---|---|---|
+| `XxxRoute` | ViewModel을 연결하고 화면 이동 처리 | `LocationRequestRoute` |
+| `XxxScreen` | 상태를 받아 그리기만 함 (Preview 가능) | `LocationRequestScreen` |
+| `XxxViewModel` | 화면 상태(`UiState`)와 로직 | `LocationRequestViewModel` |
+| `XxxRepository` | 데이터 출처를 감춤 (interface + 구현) | `PickupRepository` |
+
+- 상태가 없는 화면(메인, 가이드, 설정, 약관 상세)은 ViewModel 없이 `Screen`만 있습니다.
+- 한 번만 일어나는 일(화면 이동 등)은 ViewModel의 `Channel` 이벤트로 알립니다.
+- 새 화면 추가: `Routes.kt`에 경로 → `PickMeUpNavHost.kt`에 `composable` 추가
 
 ### UI 작업 규칙
 
