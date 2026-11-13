@@ -1,22 +1,28 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
+# ── Gradle / 빌드 결과물 ──
+.gradle/
+build/
 /captures
 .externalNativeBuild
 .cxx
-local.properties
-
-# Kotlin compiler cache
+# Kotlin 컴파일러 캐시
 .kotlin/
 
-# Personal IDE state (device selection, emulator list)
-/.idea/deploymentTargetSelector.xml
-/.idea/deviceManager.xml
+# ── 개인 환경 (절대 올리지 않기) ──
+# SDK 경로, API 주소 등 PC마다 다른 설정
+local.properties
+# 서명 키
+*.jks
+*.keystore
+keystore.properties
+
+# ── Android Studio ──
+# 개인 설정(JDK 경로, 기기 선택, 창 배치 등)이 섞여 있어 기본적으로 제외하고,
+# 팀이 같이 쓰는 코드 스타일·검사 설정만 공유합니다. 나머지는 Gradle 동기화 시 자동 생성됩니다.
+*.iml
+/.idea/*
+!/.idea/codeStyles/
+!/.idea/inspectionProfiles/
+
+# ── OS ──
+.DS_Store
+Thumbs.db
