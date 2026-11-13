@@ -3,12 +3,16 @@ package com.example.pickmeup.ui.share
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pickmeup.data.message.PickupMessageRepository
 import com.example.pickmeup.data.pickup.PickupRepository
 import com.example.pickmeup.model.LocationShareResult
+import com.example.pickmeup.model.PickupMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,6 +24,7 @@ enum class PickupResult { Cancelled, Completed }
 class PickupInProgressViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val pickupRepository: PickupRepository,
+    messageRepository: PickupMessageRepository,
 ) : ViewModel() {
 
     /**
@@ -39,6 +44,13 @@ class PickupInProgressViewModel @Inject constructor(
      * 화면 회전 후에도 팝업이 유지되도록 SavedStateHandle 에 저장
      */
     val result: StateFlow<PickupResult?> = savedStateHandle.getStateFlow(KEY_RESULT, null)
+
+    /**
+     * 대상자가 보낸 가장 최근 상황 메시지 → 알림 카드. 없으면 null.
+     * TODO: TTS 발화, 발화 종료 5초 후 숨김, 같은 메시지 중복 억제 (Figma 9-6)
+     */
+    val message: StateFlow<PickupMessage?> = messageRepository.messages
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     // TODO: 내비게이션 연동 시 경로에서 대상자 위치 제거
     fun cancelPickup() = finish(PickupResult.Cancelled) { pickupRepository.cancelPickup() }
