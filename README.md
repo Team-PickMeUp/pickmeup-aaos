@@ -133,6 +133,7 @@ app/src/main/java/com/example/pickmeup/
 ## 협업 컨벤션
 
 - 브랜치·커밋·PR·이슈 모두 **같은 타입** 사용 (아래 표 기준)
+- git 사용 순서(처음 세팅, 매번 작업 순서, 충돌 해결): [GIT_GUIDE.md](GIT_GUIDE.md)
 
 ### 타입 & 깃모지
 
