@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +41,7 @@ import com.example.pickmeup.R
 import com.example.pickmeup.model.PickupTarget
 import com.example.pickmeup.ui.components.GuideButton
 import com.example.pickmeup.ui.components.SettingsButton
+import com.example.pickmeup.ui.components.TextBackButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
@@ -103,10 +105,14 @@ fun PickupTargetSelectScreen(
             .background(PickMeUpColors.BackgroundPrimary),
     ) {
         Box(Modifier.fillMaxSize()) {
-            BackTitle(
-                title = stringResource(R.string.pickup_targets_title),
+            // Figma 뒤로가기 버튼: 210×62px 영역 안 (8, 9) 위치에 40px 글자
+            TextBackButton(
+                text = stringResource(R.string.pickup_targets_title),
+                fontSize = 40.pxSp,
+                lineHeightMultiplier = 1f,
                 onClick = onBack,
                 modifier = Modifier.padding(start = 87.px, top = 49.px),
+                contentPadding = PaddingValues(start = 8.px, end = 8.px, top = 9.px, bottom = 13.px),
             )
             GuideButton(
                 onClick = onAppGuideClick,
@@ -150,22 +156,6 @@ fun PickupTargetSelectScreen(
             }
         }
     }
-}
-
-/** "←  픽업 불러오기" (Figma 뒤로가기 버튼: 40px Bold) */
-@Composable
-private fun BackTitle(title: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Text(
-        text = "←  $title",
-        style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 1f),
-        modifier = modifier
-            .clickable(
-                role = Role.Button,
-                onClickLabel = stringResource(R.string.common_back),
-                onClick = onClick,
-            )
-            .padding(start = 8.px, end = 8.px, top = 9.px, bottom = 13.px),
-    )
 }
 
 /** 315×399px 카드 틀: 아래쪽에 이름(32px) / 보조 문구(20px) */

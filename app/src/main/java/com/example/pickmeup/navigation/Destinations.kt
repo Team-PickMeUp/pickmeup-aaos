@@ -31,6 +31,10 @@ data class LocationRequestDestination(
 @Serializable
 data object PickupTargetSelectDestination
 
+/** 저장된 픽업 대상자 전체 목록 · 삭제 */
+@Serializable
+data object PickupTargetManageDestination
+
 /** 위치 공유 결과 — 경유지 / 목적지 선택 */
 @Serializable
 data object ShareResultDestination
