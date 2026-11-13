@@ -9,7 +9,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,13 +37,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import com.example.pickmeup.R
+import com.example.pickmeup.ui.components.DimOverlay
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
-private val Dim = Color(0x70000000)          // rgba(0,0,0,0.44)
 private val TextStrong = Color(0xD6131417)   // rgba(19,20,23,0.84)
 private val Purple = Color(0xFF5A46FA)
 private val CancelRed = Color(0xFFFF4C28)
@@ -57,18 +55,7 @@ private val CancelRed = Color(0xFFFF4C28)
  */
 @Composable
 internal fun LocationShareWaitingDialog(onCancel: () -> Unit) {
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(Dim)
-            // 아래 화면이 눌리지 않도록 클릭만 소비
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = {},
-            ),
-        contentAlignment = Alignment.Center,
-    ) {
+    DimOverlay {
         val shape = RoundedCornerShape(36.px)
         Column(
             Modifier

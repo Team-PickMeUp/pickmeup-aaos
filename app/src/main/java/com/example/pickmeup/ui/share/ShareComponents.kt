@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.example.pickmeup.R
+import com.example.pickmeup.ui.components.GuideButton
 import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
@@ -38,10 +39,13 @@ import com.example.pickmeup.ui.theme.astaStyle
 
 private val Purple = Color(0xFF5A46FA)
 private val CardBorder = Color(0xFFDADCE3)
+private val SecondaryButtonBg = Color(0x0D131417) // rgba(19,20,23,0.05)
 
 /**
- * 위치 공유 이후 화면들의 공통 틀: 작은 헤더(뒤로 + 제목) + 오른쪽 위 설정 버튼.
+ * 위치 공유 이후 화면들의 공통 틀: 작은 헤더(뒤로 + 제목) + 오른쪽 위 가이드·설정 버튼.
  * Figma: 경유지 / 도착지 설정(130:11560), 미허용(133:12536), 픽업 진행 중(261:15639)
+ *
+ * @param onAppGuideClick null 이면 가이드(책) 버튼 없음 (Figma 미허용 화면)
  */
 @Composable
 internal fun ShareScreenScaffold(
@@ -49,6 +53,7 @@ internal fun ShareScreenScaffold(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onAppGuideClick: (() -> Unit)? = null,
     /** 화면 전체 위에 덮는 팝업 등 (설정 버튼보다 위) */
     overlay: @Composable BoxScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
@@ -86,6 +91,14 @@ internal fun ShareScreenScaffold(
                 content()
             }
 
+            if (onAppGuideClick != null) {
+                GuideButton(
+                    onClick = onAppGuideClick,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 23.px, end = 101.px),
+                )
+            }
             SettingsButton(
                 onClick = onSettingsClick,
                 modifier = Modifier
@@ -99,7 +112,7 @@ internal fun ShareScreenScaffold(
 
 /**
  * 950px 상태 카드: 제목 / 위치(가운데) / 안내 문구 / 버튼 2개.
- * 본문 618px 안에서 위치는 top 249.5px, 안내 문구는 top 546px (Figma 절대 위치 그대로).
+ * 본문 618px 안에서 위치는 top 249.5px, 안내 문구는 top 538px (Figma 절대 위치 그대로).
  */
 @Composable
 internal fun LocationStatusCard(
@@ -144,7 +157,7 @@ internal fun LocationStatusCard(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 546.px),
+                    .padding(top = 538.px),
             )
         }
         Row(
@@ -173,9 +186,9 @@ internal fun MessageCard(text: String) {
 }
 
 /**
- * 카드 하단 100px 버튼.
+ * 카드 하단 100px 버튼 (모서리 32px, 글자 32px).
  * - primary: 보라 배경 + 흰 글자
- * - secondary: 흰 배경 + 2px #DADCE3 테두리 + 진한 글자 (Figma "픽업 취소 버튼")
+ * - secondary: 연회색 배경(rgba(19,20,23,0.05)) + 진한 글자 (Figma "픽업 취소 버튼")
  */
 @Composable
 internal fun CardButton(
@@ -185,13 +198,11 @@ internal fun CardButton(
     primary: Boolean = true,
     enabled: Boolean = true,
 ) {
-    val shape = RoundedCornerShape(16.px)
     Box(
         modifier
             .height(100.px)
-            .clip(shape)
-            .background(if (primary) Purple else Color.White)
-            .then(if (primary) Modifier else Modifier.border(2.px, CardBorder, shape))
+            .clip(RoundedCornerShape(32.px))
+            .background(if (primary) Purple else SecondaryButtonBg)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 24.px),
         contentAlignment = Alignment.Center,
@@ -199,10 +210,10 @@ internal fun CardButton(
         Text(
             text = text,
             style = astaStyle(
-                34.pxSp,
+                32.pxSp,
                 FontWeight.Bold,
                 if (primary) Color.White else PickMeUpColors.TextPrimary,
-                44f / 34f,
+                40f / 32f,
             ),
             softWrap = false,
         )

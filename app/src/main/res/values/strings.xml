@@ -81,6 +81,7 @@
     <string name="share_result_question">경유지 또는 목적지로 설정할까요?</string>
     <string name="share_result_set_waypoint">경유지로 설정하기</string>
     <string name="share_result_set_destination">목적지로 설정하기</string>
+    <string name="share_result_denied_title">위치요청하러 돌아가기</string>
     <string name="share_result_denied">픽업 대상자가 위치공유를 허용하지 않았어요.</string>
 
     <!-- 픽업 진행 중 (Figma 261:15639) -->
