@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma: clock / 5분 제한 (node 758:30352) — 위치 공유 자동 취소 팝업 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:pathData="M42 24C42 33.9411 33.9411 42 24 42C14.0589 42 6 33.9411 6 24C6 14.0589 14.0589 6 24 6C33.9411 6 42 14.0589 42 24Z"
+        android:strokeWidth="3.3"
+        android:strokeColor="#FFFF4C28"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M24 13V25L33 31"
+        android:strokeWidth="3.3"
+        android:strokeColor="#FFFF4C28"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

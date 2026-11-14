@@ -42,15 +42,16 @@ private val CardBorder = Color(0xFFDADCE3)
 private val SecondaryButtonBg = Color(0x0D131417) // rgba(19,20,23,0.05)
 
 /**
- * 위치 공유 이후 화면들의 공통 틀: 작은 헤더(뒤로 + 제목) + 오른쪽 위 가이드·설정 버튼.
- * Figma: 경유지 / 도착지 설정(130:11560), 미허용(133:12536), 픽업 진행 중(261:15639)
+ * 위치 공유 이후 화면들의 공통 틀: 오른쪽 위 가이드·설정 버튼 + 화면을 채우는 카드.
+ * Figma: 경유지 / 도착지 설정(130:11560), 픽업 진행 중(261:15639)
  *
- * @param onAppGuideClick null 이면 가이드(책) 버튼 없음 (Figma 미허용 화면)
+ * 내비게이션에 위치를 넘긴 뒤의 화면이라 헤더(뒤로 가기)가 없습니다.
+ * 카드는 앱 영역 (64, 128) 에서 1572×1016px 입니다.
+ *
+ * @param onAppGuideClick null 이면 가이드(책) 버튼 없음
  */
 @Composable
 internal fun ShareScreenScaffold(
-    title: String,
-    onBack: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
     onAppGuideClick: (() -> Unit)? = null,
@@ -67,27 +68,8 @@ internal fun ShareScreenScaffold(
             Column(
                 Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 80.px, vertical = 48.px),
-                verticalArrangement = Arrangement.spacedBy(48.px),
+                    .padding(start = 64.px, end = 64.px, top = 128.px),
             ) {
-                Row(
-                    Modifier
-                        .height(48.px)
-                        .clickable(role = Role.Button, onClick = onBack),
-                    horizontalArrangement = Arrangement.spacedBy(16.px),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_arrow_left),
-                        contentDescription = stringResource(R.string.common_back),
-                        tint = Color.Unspecified,
-                        modifier = Modifier.size(48.px),
-                    )
-                    Text(
-                        text = title,
-                        style = astaStyle(32.pxSp, FontWeight.SemiBold, PickMeUpColors.TextPrimary, 40f / 32f),
-                    )
-                }
                 content()
             }
 
@@ -111,8 +93,8 @@ internal fun ShareScreenScaffold(
 }
 
 /**
- * 950px 상태 카드: 제목 / 위치(가운데) / 안내 문구 / 버튼 2개.
- * 본문 618px 안에서 위치는 top 249.5px, 안내 문구는 top 538px (Figma 절대 위치 그대로).
+ * 1016px 상태 카드: 제목 / 위치(가운데) / 안내 문구 / 버튼 2개.
+ * 본문 684px 안에서 위치는 top 282.5px(가운데 - 59.5), 안내 문구는 top 604px(아래에서 80) — Figma 절대 위치 그대로.
  */
 @Composable
 internal fun LocationStatusCard(
@@ -125,7 +107,7 @@ internal fun LocationStatusCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .height(950.px)
+            .height(1016.px)
             .clip(shape)
             .background(Color.White)
             .border(1.px, CardBorder, shape)
@@ -149,7 +131,7 @@ internal fun LocationStatusCard(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 249.5.px),
+                    .padding(top = 282.5.px),
             )
             Text(
                 text = guide,
@@ -157,7 +139,7 @@ internal fun LocationStatusCard(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 538.px),
+                    .padding(top = 604.px),
             )
         }
         Row(
@@ -166,23 +148,6 @@ internal fun LocationStatusCard(
             content = buttons,
         )
     }
-}
-
-/** 미허용 등 한 줄 메시지 카드 */
-@Composable
-internal fun MessageCard(text: String) {
-    val shape = RoundedCornerShape(24.px)
-    Text(
-        text = text,
-        style = astaStyle(60.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 80f / 60f),
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape)
-            .background(Color.White)
-            .border(1.px, CardBorder, shape)
-            .padding(36.px),
-    )
 }
 
 /**

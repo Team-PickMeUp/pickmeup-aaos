@@ -1,5 +1,6 @@
 package com.example.pickmeup.ui.target
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,12 +40,16 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickmeup.R
 import com.example.pickmeup.model.PickupTarget
+import com.example.pickmeup.ui.components.DimOverlay
 import com.example.pickmeup.ui.components.GuideButton
 import com.example.pickmeup.ui.components.SettingsButton
-import com.example.pickmeup.ui.components.TextBackButton
+import com.example.pickmeup.ui.components.consumeClicks
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
+import com.example.pickmeup.ui.location.LocationShareEvent
+import com.example.pickmeup.ui.location.LocationShareRequestOverlay
+import com.example.pickmeup.ui.location.LocationShareRequestState
 import com.example.pickmeup.ui.location.PhoneNumber
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
@@ -58,43 +63,70 @@ private val ManualCardBorder = Color(0xFFDCD7EF)
 private val PlusCircle = Color(0xFFEAE6FF)
 private val ViewAllBg = Color(0xFFEEEAFE)
 private val ViewAllBorder = Color(0xFFD6CFFF)
+private val ConfirmCardBg = Color(0xFFF7F7FC)
+private val ConfirmCardBorder = Color(0xFFDFDEEA)
+private val ConfirmCancelBg = Color(0xFFF0F0F5)
 
 @Composable
 fun PickupTargetSelectRoute(
-    onBack: () -> Unit,
     onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onTargetSelected: (PickupTarget) -> Unit,
     onManualInputClick: () -> Unit,
     onViewAllClick: () -> Unit,
+    onResponseReceived: () -> Unit,
     viewModel: PickupTargetSelectViewModel = hiltViewModel(),
 ) {
     val targets by viewModel.recentTargets.collectAsStateWithLifecycle()
+    val pendingConfirm by viewModel.pendingConfirm.collectAsStateWithLifecycle()
+    val shareState by viewModel.shareState.collectAsStateWithLifecycle()
+    // 확인 팝업이 열려 있으면 뒤로 가기로 팝업만 닫기 (대기·결과 팝업은 LocationShareRequestOverlay 가 처리)
+    BackHandler(enabled = pendingConfirm != null, onBack = viewModel::onConfirmDismiss)
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                LocationShareEvent.Allowed -> onResponseReceived()
+                is LocationShareEvent.RequestFailed -> Unit // TODO: 실패 안내 UI (Figma 미정)
+            }
+        }
+    }
     PickupTargetSelectScreen(
         targets = targets,
-        onBack = onBack,
+        pendingConfirm = pendingConfirm,
+        shareState = shareState,
         onAppGuideClick = onAppGuideClick,
         onSettingsClick = onSettingsClick,
-        onTargetSelected = onTargetSelected,
+        onTargetClick = viewModel::onTargetClick,
         onManualInputClick = onManualInputClick,
         onViewAllClick = onViewAllClick,
+        onConfirmDismiss = viewModel::onConfirmDismiss,
+        onConfirmRequest = viewModel::onConfirmRequest,
+        onCancelRequest = viewModel::cancelRequest,
+        onDismissShareResult = viewModel::dismissShareResult,
     )
 }
 
 /**
- * 픽업 불러오기 화면 (Figma 372:22957 "2-1 프로필 불러오는 화면").
- * 저장된 대상자 카드(최대 3개) + 직접 입력 카드를 가운데 정렬로 보여줍니다.
- * 저장된 대상자가 없으면 직접 입력 카드만 보입니다.
+ * 픽업 불러오기 화면 — 앱 첫 화면 (Figma 372:22957 "2-1 프로필 불러오는 화면").
+ * 저장된 대상자 카드(최대 3개) + "새 픽업 대상자 입력" 카드를 가운데 정렬로 보여줍니다.
+ * 저장된 대상자가 없으면 입력 카드만 보입니다. 첫 화면이라 뒤로 가기 버튼이 없습니다.
+ *
+ * - 프로필 선택 → 확인 팝업 (Figma 2-1-4) → "위치 요청하기" → 대기 팝업 (Figma 2-1-4-1)
+ * - 허용되면 경유지 / 목적지 선택 화면으로, 자동 취소·거부면 팝업 확인 후 이 화면에 머묾
  */
 @Composable
 fun PickupTargetSelectScreen(
     targets: List<PickupTarget>,
-    onBack: () -> Unit,
+    pendingConfirm: PickupTarget?,
+    shareState: LocationShareRequestState,
     onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onTargetSelected: (PickupTarget) -> Unit,
+    onTargetClick: (PickupTarget) -> Unit,
     onManualInputClick: () -> Unit,
     onViewAllClick: () -> Unit,
+    onConfirmDismiss: () -> Unit,
+    onConfirmRequest: () -> Unit,
+    onCancelRequest: () -> Unit,
+    onDismissShareResult: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ProvideDesignScale(
@@ -103,15 +135,6 @@ fun PickupTargetSelectScreen(
             .background(PickMeUpColors.BackgroundPrimary),
     ) {
         Box(Modifier.fillMaxSize()) {
-            // Figma 뒤로가기 버튼: 210×62px 영역 안 (8, 9) 위치에 40px 글자
-            TextBackButton(
-                text = stringResource(R.string.pickup_targets_title),
-                fontSize = 40.pxSp,
-                lineHeightMultiplier = 1f,
-                onClick = onBack,
-                modifier = Modifier.padding(start = 87.px, top = 49.px),
-                contentPadding = PaddingValues(start = 8.px, end = 8.px, top = 9.px, bottom = 13.px),
-            )
             GuideButton(
                 onClick = onAppGuideClick,
                 modifier = Modifier
@@ -145,22 +168,120 @@ fun PickupTargetSelectScreen(
                 Spacer(Modifier.height(77.px))
                 Row(horizontalArrangement = Arrangement.spacedBy(32.px)) {
                     targets.forEach { target ->
-                        TargetCard(target = target, onClick = { onTargetSelected(target) })
+                        TargetCard(target = target, onClick = { onTargetClick(target) })
                     }
                     ManualInputCard(onClick = onManualInputClick)
                 }
                 Spacer(Modifier.height(61.px))
                 ViewAllButton(onClick = onViewAllClick)
             }
+
+            pendingConfirm?.let { target ->
+                RequestConfirmDialog(target = target, onDismiss = onConfirmDismiss, onConfirm = onConfirmRequest)
+            }
+            LocationShareRequestOverlay(
+                state = shareState,
+                onCancelRequest = onCancelRequest,
+                onDismissResult = onDismissShareResult,
+            )
         }
     }
 }
 
-/** 315×399px 카드 틀: 아래쪽에 이름(32px) / 보조 문구(20px) */
+/**
+ * 선택한 대상자에게 위치를 요청할지 확인 (Figma 527:29080 "선택 프로필 픽업 확인 팝업", 880×520px).
+ * 바깥을 누르면 닫힘
+ */
+@Composable
+private fun RequestConfirmDialog(target: PickupTarget, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    DimOverlay(onOutsideClick = onDismiss) {
+        val shape = RoundedCornerShape(34.px)
+        Column(
+            Modifier
+                .size(width = 880.px, height = 520.px)
+                .dropShadow(shape, Shadow(radius = 28.px, offset = DpOffset(0.px, 10.px), color = Color(0x24000000)))
+                .clip(shape)
+                .background(Color.White)
+                .consumeClicks()
+                .padding(top = 78.px),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(Modifier.size(width = 784.px, height = 56.px), contentAlignment = Alignment.Center) {
+                Text(
+                    text = stringResource(R.string.pickup_targets_confirm_title),
+                    style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 40f),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+            }
+            Spacer(Modifier.height(56.px))
+            val cardShape = RoundedCornerShape(20.px)
+            Column(
+                Modifier
+                    .size(width = 744.px, height = 150.px)
+                    .clip(cardShape)
+                    .background(ConfirmCardBg)
+                    .border(1.5.px, ConfirmCardBorder, cardShape)
+                    .padding(horizontal = 52.px),
+                verticalArrangement = Arrangement.spacedBy(11.px, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = target.name,
+                    style = astaStyle(36.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 44f / 36f),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = PhoneNumber.format(target.phoneDigits),
+                    style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 34f / 26f),
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Spacer(Modifier.height(34.px))
+            Row(horizontalArrangement = Arrangement.spacedBy(60.px)) {
+                ConfirmButton(
+                    text = stringResource(R.string.pickup_targets_confirm_cancel),
+                    background = ConfirmCancelBg,
+                    textColor = PickMeUpColors.TextPrimary,
+                    onClick = onDismiss,
+                )
+                ConfirmButton(
+                    text = stringResource(R.string.pickup_targets_confirm_request),
+                    background = Purple,
+                    textColor = Color.White,
+                    onClick = onConfirm,
+                )
+            }
+        }
+    }
+}
+
+/** 확인 팝업 버튼 342×100px */
+@Composable
+private fun ConfirmButton(text: String, background: Color, textColor: Color, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(width = 342.px, height = 100.px)
+            .clip(RoundedCornerShape(32.px))
+            .background(background)
+            .clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = astaStyle(32.pxSp, FontWeight.Bold, textColor, 40f / 32f),
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/** 315×399px 카드 틀: 아래쪽에 이름(32px) / 보조 문구(20px, 없으면 생략) */
 @Composable
 private fun CardFrame(
     title: String,
-    subtitle: String,
+    subtitle: String?,
     background: Color,
     border: Color,
     elevated: Boolean,
@@ -194,13 +315,15 @@ private fun CardFrame(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Spacer(Modifier.height(19.px))
-        Text(
-            text = subtitle,
-            style = astaStyle(20.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 24f / 20f),
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-        )
+        if (subtitle != null) {
+            Spacer(Modifier.height(19.px))
+            Text(
+                text = subtitle,
+                style = astaStyle(20.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 24f / 20f),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+            )
+        }
     }
 }
 
@@ -240,12 +363,12 @@ private fun TargetCard(target: PickupTarget, onClick: () -> Unit) {
     }
 }
 
-/** 직접 입력 카드 (Figma "새 대상자 직접 입력"): 149px 원 + 63×9px 막대 두 개로 만든 + */
+/** "새 픽업 대상자 입력" 카드 (Figma 382:24021): 149px 원 + 63×9px 막대 두 개로 만든 + */
 @Composable
 private fun ManualInputCard(onClick: () -> Unit) {
     CardFrame(
         title = stringResource(R.string.pickup_targets_manual_title),
-        subtitle = stringResource(R.string.pickup_targets_manual_desc),
+        subtitle = null,
         background = ManualCardBg,
         border = ManualCardBorder,
         elevated = false,
@@ -287,26 +410,39 @@ private fun ViewAllButton(onClick: () -> Unit) {
     }
 }
 
-@Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
+private val previewTargets = listOf(
+    PickupTarget("1", "김민수", "01012345678", 3),
+    PickupTarget("2", "이서연", "01012345678", 2),
+    PickupTarget("3", "박지훈", "01012345678", 1),
+)
+
 @Composable
-private fun PickupTargetSelectPreview() {
+private fun SelectPreview(
+    targets: List<PickupTarget> = previewTargets,
+    pendingConfirm: PickupTarget? = null,
+    shareState: LocationShareRequestState = LocationShareRequestState.Idle,
+) {
     PickupTargetSelectScreen(
-        targets = listOf(
-            PickupTarget("1", "김민수", "01012345678", 3),
-            PickupTarget("2", "이서연", "01012345678", 2),
-            PickupTarget("3", "박지훈", "01012345678", 1),
-        ),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {},
-        onTargetSelected = {}, onManualInputClick = {}, onViewAllClick = {},
+        targets = targets, pendingConfirm = pendingConfirm, shareState = shareState,
+        onAppGuideClick = {}, onSettingsClick = {}, onTargetClick = {},
+        onManualInputClick = {}, onViewAllClick = {},
+        onConfirmDismiss = {}, onConfirmRequest = {}, onCancelRequest = {}, onDismissShareResult = {},
     )
 }
 
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable
-private fun PickupTargetSelectEmptyPreview() {
-    PickupTargetSelectScreen(
-        targets = emptyList(),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {},
-        onTargetSelected = {}, onManualInputClick = {}, onViewAllClick = {},
-    )
-}
+private fun PickupTargetSelectPreview() = SelectPreview()
+
+@Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetSelectEmptyPreview() = SelectPreview(targets = emptyList())
+
+@Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetConfirmPreview() = SelectPreview(pendingConfirm = previewTargets[0])
+
+@Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetWaitingPreview() =
+    SelectPreview(shareState = LocationShareRequestState.Waiting(remainingSeconds = 300))

@@ -42,7 +42,6 @@ fun PickupInProgressRoute(
         onResultConfirm = onFinished,
         message = message,
         enabled = !isProcessing,
-        onBack = onBack,
         onAppGuideClick = onAppGuideClick,
         onSettingsClick = onSettingsClick,
         onCancelPickup = viewModel::cancelPickup,
@@ -53,13 +52,12 @@ fun PickupInProgressRoute(
 /**
  * 픽업 진행 중 화면 (Figma 261:15639 "픽업 진행 중 (경유지/목적지 설정 후)").
  * 경유지 또는 목적지로 설정한 뒤 표시되며, 공유받은 위치를 계속 보여줍니다.
- * 픽업 취소·완료 처리 후 결과 팝업(Figma 8-1, 8-2) → 확인 시 메인으로.
+ * 픽업 취소·완료 처리 후 결과 팝업(Figma 8-1, 8-2) → 확인 시 첫 화면(픽업 불러오기)으로.
  * 대상자 상황 메시지가 오면 위쪽에 알림 카드(Figma 6-1-4-1~3).
  */
 @Composable
 fun PickupInProgressScreen(
     location: LocationShareResult.Allowed,
-    onBack: () -> Unit,
     onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onCancelPickup: () -> Unit,
@@ -71,8 +69,6 @@ fun PickupInProgressScreen(
     message: PickupMessage? = null,
 ) {
     ShareScreenScaffold(
-        title = stringResource(R.string.pickup_progress_title),
-        onBack = onBack,
         onSettingsClick = onSettingsClick,
         modifier = modifier,
         onAppGuideClick = onAppGuideClick,
@@ -116,6 +112,6 @@ fun PickupInProgressScreen(
 private fun PickupInProgressPreview() {
     PickupInProgressScreen(
         location = LocationShareResult.Allowed("홍길동", "00시 00구 00로", 0.0, 0.0),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onCancelPickup = {}, onCompletePickup = {},
+        onAppGuideClick = {}, onSettingsClick = {}, onCancelPickup = {}, onCompletePickup = {},
     )
 }

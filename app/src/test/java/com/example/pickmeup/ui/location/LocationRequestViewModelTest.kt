@@ -85,7 +85,7 @@ class LocationRequestViewModelTest {
 
         vm.requestLocation()
 
-        assertEquals(LocationRequestEvent.ResponseReceived, vm.events.first())
+        assertEquals(LocationShareEvent.Allowed, vm.events.first())
         val share = repository.currentShare.value as LocationShareResult.Allowed
         assertEquals("홍길동", share.targetName)
     }
@@ -98,7 +98,7 @@ class LocationRequestViewModelTest {
 
         vm.requestLocation()
 
-        assertEquals(LocationRequestEvent.ResponseReceived, vm.events.first())
+        assertEquals(LocationShareEvent.Allowed, vm.events.first())
         assertEquals(listOf("홍길동"), targetRepository.stored.map { it.name })
     }
 
@@ -109,7 +109,7 @@ class LocationRequestViewModelTest {
 
         vm.requestLocation()
 
-        assertEquals(LocationRequestEvent.ResponseReceived, vm.events.first())
+        assertEquals(LocationShareEvent.Allowed, vm.events.first())
         assertTrue(targetRepository.stored.isEmpty())
     }
 
@@ -125,7 +125,7 @@ class LocationRequestViewModelTest {
 
         advanceTimeBy(3.seconds)
         runCurrent()
-        assertEquals(LocationRequestEvent.ResponseReceived, waitingVm.events.first())
+        assertEquals(LocationShareEvent.Allowed, waitingVm.events.first())
         assertFalse(waitingVm.uiState.value.isRequesting)
     }
 
@@ -133,7 +133,7 @@ class LocationRequestViewModelTest {
     fun cancelWhileWaiting_staysWithInputsAndSendsNoEvent() = runTest {
         val slowRepository = FakePickupRepository(responseDelay = 10.seconds)
         val waitingVm = LocationRequestViewModel(SavedStateHandle(), slowRepository, targetRepository)
-        val events = mutableListOf<LocationRequestEvent>()
+        val events = mutableListOf<LocationShareEvent>()
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { waitingVm.events.collect { events += it } }
         waitingVm.onNameChange("홍길동")
         waitingVm.onPhoneChange("01012345678")

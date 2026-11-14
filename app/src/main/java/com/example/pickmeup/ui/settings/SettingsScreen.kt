@@ -48,13 +48,12 @@ private data class SettingsItem(
 
 /**
  * 설정 화면 (Figma node 37:9324 "2-2 설정화면").
- * 이용 안내 / 픽업 설정 / 약관 및 개인정보 3개 그룹으로 구성됩니다.
+ * 이용 안내 / 약관 및 개인정보 2개 그룹으로 구성됩니다. (Figma 에서 "픽업 대상자 설정" 그룹은 숨김 처리되어 제외)
  */
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
     onAppGuideClick: () -> Unit,
-    onPickupTargetClick: () -> Unit,
     onLocationTermsClick: () -> Unit,
     onServiceTermsClick: () -> Unit,
     onPrivacyPolicyClick: () -> Unit,
@@ -93,17 +92,6 @@ fun SettingsScreen(
                             R.string.settings_guide_title,
                             R.string.settings_guide_desc,
                             onAppGuideClick,
-                        ),
-                    ),
-                )
-                SettingsGroup(
-                    label = R.string.settings_section_pickup,
-                    items = listOf(
-                        SettingsItem(
-                            R.drawable.ic_settings_user_check,
-                            R.string.settings_target_title,
-                            R.string.settings_target_desc,
-                            onPickupTargetClick,
                         ),
                     ),
                 )
@@ -215,7 +203,6 @@ private fun SettingsScreenPreview() {
     SettingsScreen(
         onBack = {},
         onAppGuideClick = {},
-        onPickupTargetClick = {},
         onLocationTermsClick = {},
         onServiceTermsClick = {},
         onPrivacyPolicyClick = {},

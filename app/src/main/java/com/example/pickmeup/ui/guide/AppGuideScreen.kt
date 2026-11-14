@@ -3,11 +3,11 @@ package com.example.pickmeup.ui.guide
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -41,7 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import com.example.pickmeup.R
-import com.example.pickmeup.ui.components.SettingsButton
+import com.example.pickmeup.ui.components.ScreenHeader
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
@@ -72,7 +71,6 @@ private val DOT_INDICATORS = listOf(
 @Composable
 fun AppGuideScreen(
     onBack: () -> Unit,
-    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pagerState = rememberPagerState { DOT_INDICATORS.size }
@@ -82,70 +80,47 @@ fun AppGuideScreen(
             .fillMaxSize()
             .background(PickMeUpColors.BackgroundPrimary),
     ) {
-        Box(Modifier.fillMaxSize()) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 80.px, vertical = 48.px),
-                verticalArrangement = Arrangement.spacedBy(32.px),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                // 헤더
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .clickable(role = Role.Button, onClick = onBack),
-                    horizontalArrangement = Arrangement.spacedBy(16.px),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_back_chevron),
-                        contentDescription = stringResource(R.string.common_back),
-                        tint = Color.Unspecified,
-                        modifier = Modifier.size(30.72.px),
-                    )
-                    Text(
-                        text = stringResource(R.string.guide_title),
-                        style = astaStyle(44.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 44f),
-                    )
-                }
+        // Figma: 헤더 (64, 48) / 슬라이드 (80, 176) 1540×912 / 인디케이터 y 1120, 오른쪽 위 아이콘 없음
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(start = 64.px, end = 64.px, top = 48.px, bottom = 48.px),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            ScreenHeader(title = stringResource(R.string.guide_title), onBack = onBack)
+            Spacer(Modifier.height(32.px))
 
-                // 캐러셀 슬라이드
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    pageSpacing = 80.px,
-                ) { page ->
-                    when (page) {
-                        0 -> Step1Slide()
-                        1 -> Step2Slide()
-                        else -> Step3Slide()
-                    }
-                }
-
-                // 캐러셀 인디케이터
-                val pageDescription = stringResource(
-                    R.string.guide_page_description,
-                    pagerState.currentPage + 1,
-                    pagerState.pageCount,
-                )
-                Icon(
-                    painter = painterResource(DOT_INDICATORS[pagerState.currentPage]),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                    modifier = Modifier
-                        .size(width = 68.px, height = 16.px)
-                        .semantics { contentDescription = pageDescription },
-                )
-            }
-
-            SettingsButton(
-                onClick = onSettingsClick,
+            // 캐러셀 슬라이드
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 23.px, end = 23.px),
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = PaddingValues(horizontal = 16.px),
+                pageSpacing = 80.px,
+            ) { page ->
+                when (page) {
+                    // Figma 1단계는 슬라이드 높이가 832px (다른 단계보다 80px 짧음)
+                    0 -> Box(Modifier.padding(bottom = 80.px)) { Step1Slide() }
+                    1 -> Step2Slide()
+                    else -> Step3Slide()
+                }
+            }
+            Spacer(Modifier.height(32.px))
+
+            // 캐러셀 인디케이터
+            val pageDescription = stringResource(
+                R.string.guide_page_description,
+                pagerState.currentPage + 1,
+                pagerState.pageCount,
+            )
+            Icon(
+                painter = painterResource(DOT_INDICATORS[pagerState.currentPage]),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier
+                    .size(width = 68.px, height = 16.px)
+                    .semantics { contentDescription = pageDescription },
             )
         }
     }
@@ -486,5 +461,5 @@ private fun MockPurpleButton(@StringRes text: Int, modifier: Modifier) {
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable
 private fun AppGuideScreenPreview() {
-    AppGuideScreen(onBack = {}, onSettingsClick = {})
+    AppGuideScreen(onBack = {})
 }

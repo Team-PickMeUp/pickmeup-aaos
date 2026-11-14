@@ -32,15 +32,14 @@ class PickupInProgressViewModel @Inject constructor(
      * (완료/취소하면 저장소 값이 비워지는데, 그때 화면이 '데이터 없음'으로 바뀌지 않도록)
      * null 이면 진행 중인 픽업 없이 들어온 것 → 이전 화면으로
      */
-    val location: LocationShareResult.Allowed? =
-        pickupRepository.currentShare.value as? LocationShareResult.Allowed
+    val location: LocationShareResult.Allowed? = pickupRepository.currentShare.value
 
     private val _isProcessing = MutableStateFlow(false)
     /** 완료/취소 처리 중 (버튼 중복 클릭 방지) */
     val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
 
     /**
-     * 완료/취소 처리 결과. null 이 아니면 결과 팝업 표시 → 확인 시 메인으로.
+     * 완료/취소 처리 결과. null 이 아니면 결과 팝업 표시 → 확인 시 첫 화면(픽업 불러오기)으로.
      * 화면 회전 후에도 팝업이 유지되도록 SavedStateHandle 에 저장
      */
     val result: StateFlow<PickupResult?> = savedStateHandle.getStateFlow(KEY_RESULT, null)

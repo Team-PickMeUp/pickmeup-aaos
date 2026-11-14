@@ -34,7 +34,7 @@ Screen (Compose) ── 이벤트 ──▶ ViewModel ──▶ Repository ─�
 | `XxxViewModel` | 화면 상태(`UiState`), 로직 | `LocationRequestViewModel` |
 | `XxxRepository` | 데이터 출처 캡슐화 (interface + 구현) | `PickupRepository` |
 
-- 상태 없는 화면(메인, 가이드, 설정, 약관 상세)은 ViewModel 없이 `Screen`만 존재
+- 상태 없는 화면(가이드, 설정, 약관 상세)은 ViewModel 없이 `Screen`만 존재
 - 일회성 이벤트(화면 이동 등)는 ViewModel의 `Channel`로 전달
 - 새 화면 추가: `Destinations.kt`에 경로(`XxxDestination`) 추가 → `PickMeUpNavHost.kt`에 `composable` 등록
 
@@ -57,7 +57,6 @@ app/src/main/java/com/example/pickmeup/
     ├── theme/               # 색상, 폰트(Asta Sans), 텍스트 스타일
     ├── components/          # 공통 컴포넌트 (헤더, 설정 버튼)
     ├── terms/               # 약관 동의 / 약관 상세
-    ├── main/                # 메인
     ├── target/              # 픽업 불러오기 (저장된 대상자 선택)
     ├── location/            # 위치 요청, 전화번호 검증
     ├── share/               # 공유 결과, 픽업 진행 중

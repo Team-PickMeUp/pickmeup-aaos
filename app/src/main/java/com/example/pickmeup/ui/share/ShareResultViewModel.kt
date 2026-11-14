@@ -19,7 +19,7 @@ class ShareResultViewModel @Inject constructor(
 ) : ViewModel() {
 
     /** null 이면 진행 중인 픽업이 없음 → 이전 화면으로 */
-    val shareResult: StateFlow<LocationShareResult?> = pickupRepository.currentShare
+    val shareResult: StateFlow<LocationShareResult.Allowed?> = pickupRepository.currentShare
 
     private val _pickupStarted = Channel<Unit>(Channel.BUFFERED)
     /** 경유지/목적지 설정 완료 → 픽업 진행 중 화면으로 */
