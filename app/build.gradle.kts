@@ -16,6 +16,8 @@ val localProps = Properties().apply {
 val apiBaseUrl = localProps.getProperty("pickmeup.api.baseUrl") ?: "http://10.0.2.2:8080/"
 // 서버가 준비되기 전까지는 가짜 저장소(FakePickupRepository)를 사용합니다.
 val useFakeApi = localProps.getProperty("pickmeup.api.useFake")?.toBoolean() ?: true
+// Pleos 내비 서비스가 없는 환경(일반 에뮬레이터 등)에서는 `pickmeup.navi.useFake=true` 로 가짜 내비를 사용합니다.
+val useFakeNavi = localProps.getProperty("pickmeup.navi.useFake")?.toBoolean() ?: false
 
 android {
     namespace = "com.example.pickmeup"
@@ -34,6 +36,7 @@ android {
 
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         buildConfigField("boolean", "USE_FAKE_API", "$useFakeApi")
+        buildConfigField("boolean", "USE_FAKE_NAVI", "$useFakeNavi")
     }
 
     buildTypes {
@@ -75,6 +78,8 @@ dependencies {
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
+
+    implementation(libs.pleos.navi.helper)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
