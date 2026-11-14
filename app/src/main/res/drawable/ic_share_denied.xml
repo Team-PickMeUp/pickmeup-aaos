@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma: location-off / 위치 공유 거부 (node 758:31496) — 위치 공유 거부 팝업 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:pathData="M24 44C24 44 40 29 40 18C40 13.7565 38.3143 9.68687 35.3137 6.68629C32.3131 3.68571 28.2435 2 24 2C19.7565 2 15.6869 3.68571 12.6863 6.68629C9.68571 9.68687 8 13.7565 8 18C8 29 24 44 24 44Z"
+        android:strokeWidth="3.1"
+        android:strokeColor="#FFFF4C28"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M17.5 14.5L24 21M24 21L30.5 27.5M24 21L30.5 14.5M24 21L17.5 27.5"
+        android:strokeWidth="3.1"
+        android:strokeColor="#FFFF4C28"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

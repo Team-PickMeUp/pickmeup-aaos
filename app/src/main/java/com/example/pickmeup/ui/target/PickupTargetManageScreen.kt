@@ -42,7 +42,7 @@ import com.example.pickmeup.model.PickupTarget
 import com.example.pickmeup.ui.components.DimOverlay
 import com.example.pickmeup.ui.components.GuideButton
 import com.example.pickmeup.ui.components.SettingsButton
-import com.example.pickmeup.ui.components.TextBackButton
+import com.example.pickmeup.ui.components.ScreenHeader
 import com.example.pickmeup.ui.components.consumeClicks
 import com.example.pickmeup.ui.design.ProvideDesignScale
 import com.example.pickmeup.ui.design.px
@@ -57,6 +57,9 @@ private val DeleteRed = Color(0xFFFF4C28)
 private val EmptyBg = Color(0xFFF0EFF8)
 private val Dim = Color(0xFF16121F).copy(alpha = 0.45f)
 private val CancelBg = Color(0xFFF1EFF9)
+private val EditBg = Color(0xFFF0EDFF)
+private val EditBorder = Color(0xFFD5CEFF)
+private val EditText = Color(0xFF5A46FA)
 
 @Composable
 fun PickupTargetManageRoute(
@@ -67,8 +70,9 @@ fun PickupTargetManageRoute(
     viewModel: PickupTargetManageViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    // 삭제 팝업이 열려 있으면 뒤로 가기로 팝업만 닫기
+    // 삭제 / 수정 팝업이 열려 있으면 뒤로 가기로 팝업만 닫기
     BackHandler(enabled = uiState.pendingDelete != null, onBack = viewModel::onDeleteDismiss)
+    BackHandler(enabled = uiState.editing != null, onBack = viewModel::onEditDismiss)
     PickupTargetManageScreen(
         uiState = uiState,
         onBack = onBack,
@@ -78,12 +82,18 @@ fun PickupTargetManageRoute(
         onDeleteClick = viewModel::onDeleteClick,
         onDeleteDismiss = viewModel::onDeleteDismiss,
         onDeleteConfirm = viewModel::onDeleteConfirm,
+        onEditClick = viewModel::onEditClick,
+        onEditNameChange = viewModel::onEditNameChange,
+        onEditPhoneChange = viewModel::onEditPhoneChange,
+        onEditDismiss = viewModel::onEditDismiss,
+        onEditSave = viewModel::onEditSave,
     )
 }
 
 /**
- * 저장된 픽업 대상자 목록 (Figma 388:25033 "2-1-1", 삭제 확인 팝업 391:26088 "2-1-2").
+ * 저장된 픽업 대상자 목록 (Figma 388:25033 "2-1-1", 삭제 확인 팝업 391:26088 "2-1-2", 수정 팝업 507:27177 "2-1-3").
  * - 대상자 줄 선택 → 위치 요청 (픽업 불러오기는 최근 3명만 보여서 나머지는 여기서 선택)
+ * - 수정 → 이름·전화번호 수정 팝업 → 저장하면 목록에 바로 반영 (순서는 그대로)
  * - 삭제 → 확인 팝업 → 삭제하면 목록이 자동으로 당겨짐
  * - 저장된 대상자가 없으면 빈 목록 안내
  */
@@ -97,6 +107,11 @@ fun PickupTargetManageScreen(
     onDeleteClick: (PickupTarget) -> Unit,
     onDeleteDismiss: () -> Unit,
     onDeleteConfirm: () -> Unit,
+    onEditClick: (PickupTarget) -> Unit,
+    onEditNameChange: (String) -> Unit,
+    onEditPhoneChange: (String) -> Unit,
+    onEditDismiss: () -> Unit,
+    onEditSave: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ProvideDesignScale(
@@ -105,14 +120,11 @@ fun PickupTargetManageScreen(
             .background(PickMeUpColors.BackgroundPrimary),
     ) {
         Box(Modifier.fillMaxSize()) {
-            // Figma "이전 프로필 화면 이동": 230×62px 영역 안 y 5px 에 30px 글자
-            TextBackButton(
-                text = stringResource(R.string.pickup_targets_manage_back),
-                fontSize = 30.pxSp,
-                lineHeightMultiplier = 38f / 30f,
-                onClick = onBack,
-                modifier = Modifier.padding(start = 79.px, top = 46.px),
-                contentPadding = PaddingValues(top = 5.px, bottom = 19.px, end = 8.px),
+            // Figma 헤더: 뒤로 가기 (64, 56) 80px + 제목 (168, 70) — Pleos 설정 헤더 규격
+            ScreenHeader(
+                title = stringResource(R.string.pickup_targets_manage_header),
+                onBack = onBack,
+                modifier = Modifier.padding(start = 64.px, end = 64.px, top = 48.px),
             )
             GuideButton(
                 onClick = onAppGuideClick,
@@ -151,6 +163,7 @@ fun PickupTargetManageScreen(
                             TargetRow(
                                 target = target,
                                 onClick = { onTargetSelected(target) },
+                                onEditClick = { onEditClick(target) },
                                 onDeleteClick = { onDeleteClick(target) },
                                 modifier = Modifier.animateItem(),
                             )
@@ -167,6 +180,15 @@ fun PickupTargetManageScreen(
                     onConfirm = onDeleteConfirm,
                 )
             }
+            uiState.editing?.let { editing ->
+                ProfileEditDialog(
+                    state = editing,
+                    onNameChange = onEditNameChange,
+                    onPhoneChange = onEditPhoneChange,
+                    onDismiss = onEditDismiss,
+                    onSave = onEditSave,
+                )
+            }
         }
     }
 }
@@ -176,6 +198,7 @@ fun PickupTargetManageScreen(
 private fun TargetRow(
     target: PickupTarget,
     onClick: () -> Unit,
+    onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -222,6 +245,20 @@ private fun TargetRow(
                 style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 28f / 24f),
             )
         }
+        // 수정 (Figma 508:28217): 연보라 배경 + 1px 테두리, 삭제 버튼과 24px 간격
+        PopupButton(
+            text = stringResource(R.string.pickup_targets_manage_edit),
+            background = EditBg,
+            textColor = EditText,
+            fontSize = 28,
+            lineHeight = 36,
+            onClick = onEditClick,
+            modifier = Modifier
+                .size(width = 190.px, height = 69.px)
+                .border(1.px, EditBorder, RoundedCornerShape(16.px)),
+            cornerRadius = 16,
+        )
+        Spacer(Modifier.width(24.px))
         PopupButton(
             text = stringResource(R.string.pickup_targets_manage_delete),
             background = DeleteRed,
@@ -329,7 +366,7 @@ private fun DeleteConfirmDialog(
     }
 }
 
-/** 둥근 사각 버튼 (삭제 / 돌아가기 / 삭제하기). 기본값은 팝업 버튼 (30px 글자, 17px 모서리) */
+/** 둥근 사각 버튼 (수정 / 삭제 / 돌아가기 / 삭제하기). 기본값은 팝업 버튼 (30px 글자, 17px 모서리) */
 @Composable
 private fun PopupButton(
     text: String,
@@ -369,6 +406,7 @@ private fun PickupTargetManagePreview() {
         uiState = PickupTargetManageUiState(targets = previewTargets),
         onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
         onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
+        onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
     )
 }
 
@@ -379,6 +417,7 @@ private fun PickupTargetManageEmptyPreview() {
         uiState = PickupTargetManageUiState(),
         onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
         onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
+        onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
     )
 }
 
@@ -389,5 +428,21 @@ private fun PickupTargetDeleteDialogPreview() {
         uiState = PickupTargetManageUiState(targets = previewTargets, pendingDelete = previewTargets[0]),
         onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
         onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
+        onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+    )
+}
+
+@Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetEditDialogPreview() {
+    val target = previewTargets[0]
+    PickupTargetManageScreen(
+        uiState = PickupTargetManageUiState(
+            targets = previewTargets,
+            editing = ProfileEditState(target, target.name, target.phoneDigits),
+        ),
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
+        onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
+        onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
     )
 }

@@ -11,12 +11,16 @@ import kotlinx.coroutines.flow.StateFlow
  */
 interface PickupRepository {
 
-    /** 진행 중인 픽업의 위치 공유 결과. 진행 중인 픽업이 없으면 null */
-    val currentShare: StateFlow<LocationShareResult?>
+    /**
+     * 진행 중인 픽업의 위치 (대상자가 허용한 결과만). 진행 중인 픽업이 없으면 null.
+     * 미허용 응답은 픽업이 시작되지 않은 것이라 여기에 남기지 않습니다.
+     */
+    val currentShare: StateFlow<LocationShareResult.Allowed?>
 
     /**
      * 대상자에게 위치 공유를 요청하고, 대상자가 응답(허용/미허용)할 때까지 기다립니다.
      * 기다리는 중에 코루틴이 취소되면 기다리기만 멈추므로, 요청 자체는 [cancelLocationRequest] 로 취소하세요.
+     * 응답 제한 시간(5분)은 화면 쪽([com.example.pickmeup.ui.location.LocationShareRequester])에서 관리합니다.
      */
     suspend fun requestLocationShare(targetName: String, phoneNumber: String): Result<LocationShareResult>
 

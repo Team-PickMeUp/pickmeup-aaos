@@ -38,6 +38,13 @@ interface PickupTargetRepository {
     /** 대상자 저장. 같은 전화번호가 있으면 이름을 덮어쓰고 맨 앞으로 */
     suspend fun save(name: String, phoneDigits: String): Result<PickupTarget>
 
+    /**
+     * 대상자 이름·전화번호 수정. 목록 순서(저장 시각)는 그대로 유지.
+     * 바꾼 번호가 다른 대상자와 같으면 그 대상자는 지움 (같은 번호는 한 명으로 취급).
+     * 없는 ID 면 [NoSuchElementException] 실패
+     */
+    suspend fun update(id: String, name: String, phoneDigits: String): Result<PickupTarget>
+
     /** 대상자 삭제. 없는 ID 면 아무것도 하지 않음 */
     suspend fun delete(id: String): Result<Unit>
 }
@@ -80,6 +87,21 @@ class LocalPickupTargetRepository @Inject constructor(
             saved
         }
     }
+
+    override suspend fun update(id: String, name: String, phoneDigits: String): Result<PickupTarget> =
+        runSuspendCatching {
+            mutex.withLock {
+                val current = load()
+                val original = current.find { it.id == id } ?: throw NoSuchElementException("저장된 대상자가 없습니다: $id")
+                val updated = original.copy(name = name, phoneDigits = phoneDigits)
+                val list = current
+                    .filterNot { it.id != id && it.phoneDigits == phoneDigits }
+                    .map { if (it.id == id) updated else it }
+                persist(list)
+                _targets.value = list
+                updated
+            }
+        }
 
     override suspend fun delete(id: String): Result<Unit> = runSuspendCatching {
         mutex.withLock {

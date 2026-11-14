@@ -32,6 +32,17 @@ class FakePickupTargetRepository(initial: List<PickupTarget> = emptyList()) : Pi
         return Result.success(saved)
     }
 
+    override suspend fun update(id: String, name: String, phoneDigits: String): Result<PickupTarget> {
+        val original = stored.find { it.id == id }
+            ?: return Result.failure(NoSuchElementException(id))
+        val updated = original.copy(name = name, phoneDigits = phoneDigits)
+        stored = stored
+            .filterNot { it.id != id && it.phoneDigits == phoneDigits }
+            .map { if (it.id == id) updated else it }
+        state.value = stored
+        return Result.success(updated)
+    }
+
     override suspend fun delete(id: String): Result<Unit> {
         stored = stored.filterNot { it.id == id }
         state.value = stored

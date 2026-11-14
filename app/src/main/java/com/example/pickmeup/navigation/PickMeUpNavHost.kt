@@ -1,12 +1,9 @@
 package com.example.pickmeup.navigation
 
-import android.widget.Toast
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
@@ -14,10 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.example.pickmeup.R
 import com.example.pickmeup.ui.guide.AppGuideScreen
 import com.example.pickmeup.ui.location.LocationRequestRoute
-import com.example.pickmeup.ui.main.MainScreen
 import com.example.pickmeup.ui.settings.SettingsScreen
 import com.example.pickmeup.ui.share.LocationShareResultRoute
 import com.example.pickmeup.ui.share.PickupInProgressRoute
@@ -40,14 +35,11 @@ fun PickMeUpNavHost(
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    val comingSoon = stringResource(R.string.coming_soon)
-    // TODO: Pleos 에서는 Toast 가 보이지 않음 → 화면 내 안내로 교체
-    val showComingSoon = { Toast.makeText(context, comingSoon, Toast.LENGTH_SHORT).show() }
 
     NavHost(
         navController = navController,
-        startDestination = if (startWithTerms) TermsAgreementDestination else MainDestination,
+        // 첫 화면: 픽업 불러오기 (Figma 메인 화면은 숨김 처리되어 없음)
+        startDestination = if (startWithTerms) TermsAgreementDestination else PickupTargetSelectDestination,
         modifier = modifier,
         // 차량 화면: 전환 애니메이션 없이 바로 바뀜
         enterTransition = { EnterTransition.None },
@@ -58,7 +50,7 @@ fun PickMeUpNavHost(
         composable<TermsAgreementDestination> {
             TermsAgreementRoute(
                 onAgreed = {
-                    navController.navigate(MainDestination) {
+                    navController.navigate(PickupTargetSelectDestination) {
                         popUpTo<TermsAgreementDestination> { inclusive = true }
                     }
                 },
@@ -74,25 +66,14 @@ fun PickMeUpNavHost(
             )
         }
 
-        composable<MainDestination> {
-            MainScreen(
-                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
-                onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
-                onRequestLocationClick = { navController.navigateSingle(LocationRequestDestination()) },
-                onLoadPickupTargetsClick = { navController.navigateSingle(PickupTargetSelectDestination) },
-            )
-        }
-
-        composable<PickupTargetSelectDestination> { entry ->
+        composable<PickupTargetSelectDestination> {
             PickupTargetSelectRoute(
-                onBack = navController.backFrom(entry),
                 onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
                 onSettingsClick = { navController.navigateSingle(SettingsDestination) },
-                onTargetSelected = { target ->
-                    navController.navigate(LocationRequestDestination(target.name, target.phoneDigits))
-                },
                 onManualInputClick = { navController.navigate(LocationRequestDestination()) },
                 onViewAllClick = { navController.navigateSingle(PickupTargetManageDestination) },
+                // 프로필 확인 팝업 → 이 화면에서 바로 요청 → 허용되면 경유지 / 목적지 선택
+                onResponseReceived = { navController.navigateSingle(ShareResultDestination) },
             )
         }
 
@@ -130,23 +111,20 @@ fun PickMeUpNavHost(
                 onBack = navController.backFrom(entry),
                 onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
                 onSettingsClick = { navController.navigateSingle(SettingsDestination) },
-                // 픽업 종료: 메인만 남기고 모두 닫음 (메인에서 뒤로 가도 지난 픽업 화면이 안 나옴)
-                onFinished = { navController.popBackStack(MainDestination, inclusive = false) },
+                // 픽업 종료: 첫 화면만 남기고 모두 닫음 (첫 화면에서 뒤로 가도 지난 픽업 화면이 안 나옴)
+                onFinished = { navController.popBackStack(PickupTargetSelectDestination, inclusive = false) },
             )
         }
 
         composable<AppGuideDestination> { entry ->
-            AppGuideScreen(
-                onBack = navController.backFrom(entry),
-                onSettingsClick = { navController.navigateSingle(SettingsDestination) },
-            )
+            // Figma: 가이드 화면에는 설정 아이콘이 없음
+            AppGuideScreen(onBack = navController.backFrom(entry))
         }
 
         composable<SettingsDestination> { entry ->
             SettingsScreen(
                 onBack = navController.backFrom(entry),
                 onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
-                onPickupTargetClick = showComingSoon, // TODO: 픽업 대상자 지정 화면 (Figma 미정)
                 onLocationTermsClick = { navController.navigate(TermsDetailDestination(TermsType.Location)) },
                 onServiceTermsClick = { navController.navigate(TermsDetailDestination(TermsType.Service)) },
                 onPrivacyPolicyClick = { navController.navigate(TermsDetailDestination(TermsType.Privacy)) },

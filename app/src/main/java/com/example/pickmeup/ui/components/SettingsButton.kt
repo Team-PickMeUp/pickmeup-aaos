@@ -23,7 +23,7 @@ fun SettingsButton(
 ) {
     HeaderIconButton(
         icon = R.drawable.ic_settings,
-        contentDescription = stringResource(R.string.main_settings),
+        contentDescription = stringResource(R.string.common_settings),
         onClick = onClick,
         modifier = modifier,
     )
@@ -40,7 +40,7 @@ fun GuideButton(
 ) {
     HeaderIconButton(
         icon = R.drawable.ic_book_open,
-        contentDescription = stringResource(R.string.main_app_guide),
+        contentDescription = stringResource(R.string.common_app_guide),
         onClick = onClick,
         modifier = modifier,
     )

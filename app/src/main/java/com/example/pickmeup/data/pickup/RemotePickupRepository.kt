@@ -27,8 +27,8 @@ class RemotePickupRepository @Inject constructor(
     private val api: PickupApi,
 ) : PickupRepository {
 
-    private val _currentShare = MutableStateFlow<LocationShareResult?>(null)
-    override val currentShare: StateFlow<LocationShareResult?> = _currentShare.asStateFlow()
+    private val _currentShare = MutableStateFlow<LocationShareResult.Allowed?>(null)
+    override val currentShare: StateFlow<LocationShareResult.Allowed?> = _currentShare.asStateFlow()
 
     /** 완료/취소 API 에 필요한 현재 요청 ID */
     private var currentRequestId: Long? = null
@@ -40,6 +40,7 @@ class RemotePickupRepository @Inject constructor(
         val created = api.createLocationRequest(CreateLocationRequestBody(targetName, phoneNumber))
         currentRequestId = created.id
 
+        // 화면 쪽 5분 카운트다운이 먼저 요청을 취소하므로, 이 제한은 서버가 응답을 안 줄 때를 대비한 안전장치입니다.
         // withTimeout 은 시간 초과를 '취소'로 던져서 runSuspendCatching 이 실패로 잡지 못함 → OrNull 사용
         val answered = withTimeoutOrNull(RESPONSE_TIMEOUT) {
             var response = created
@@ -49,7 +50,13 @@ class RemotePickupRepository @Inject constructor(
             }
             response
         } ?: throw ResponseTimeoutException()
-        answered.toShareResult().also { _currentShare.value = it }
+        answered.toShareResult().also { result ->
+            when (result) {
+                is LocationShareResult.Allowed -> _currentShare.value = result
+                // 미허용: 픽업이 시작되지 않았으므로 진행 중인 요청도 비움
+                is LocationShareResult.Denied -> currentRequestId = null
+            }
+        }
     }
 
     override suspend fun cancelLocationRequest(): Result<Unit> = runSuspendCatching {
@@ -84,7 +91,8 @@ class RemotePickupRepository @Inject constructor(
 
     private companion object {
         val POLL_INTERVAL = 3.seconds
-        val RESPONSE_TIMEOUT = 5.minutes
+        /** 화면 카운트다운(5분)보다 조금 길게 → 정상적으로는 화면 쪽 시간 초과가 먼저 처리됨 */
+        val RESPONSE_TIMEOUT = 5.minutes + 10.seconds
     }
 }
 

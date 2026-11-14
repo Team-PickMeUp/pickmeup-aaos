@@ -30,7 +30,6 @@ fun LocationShareResultRoute(
     }
     LocationShareResultScreen(
         result = current,
-        onBack = onBack,
         onAppGuideClick = onAppGuideClick,
         onSettingsClick = onSettingsClick,
         onSetWaypoint = viewModel::setAsWaypoint,
@@ -39,49 +38,39 @@ fun LocationShareResultRoute(
 }
 
 /**
- * 위치 공유 결과 화면 — "경유지 / 목적지 선택".
- * - 허용: Figma 130:11560 "경유지 / 도착지 설정"
- * - 미허용: Figma 133:12536 "application - 미허용"
+ * 경유지 / 목적지 선택 (Figma 130:11560 "7 경유지 / 도착지 설정").
+ * 대상자가 위치 공유를 허용했을 때만 들어옵니다. 거부는 위치 요청 화면의 팝업(Figma 4-3)으로 처리합니다.
+ * 내비게이션에 위치를 넘긴 뒤의 화면이라 뒤로 가기 버튼이 없습니다.
  */
 @Composable
 fun LocationShareResultScreen(
-    result: LocationShareResult,
-    onBack: () -> Unit,
+    result: LocationShareResult.Allowed,
     onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onSetWaypoint: (LocationShareResult.Allowed) -> Unit,
     onSetDestination: (LocationShareResult.Allowed) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isAllowed = result is LocationShareResult.Allowed
     ShareScreenScaffold(
-        // 미허용이면 뒤로 가기가 곧 위치 요청으로 돌아가는 것이라 제목도 그렇게 (Figma 6-2-1)
-        title = stringResource(if (isAllowed) R.string.share_result_title else R.string.share_result_denied_title),
-        onBack = onBack,
         onSettingsClick = onSettingsClick,
         modifier = modifier,
-        // Figma: 미허용 화면에는 가이드(책) 버튼 없음
-        onAppGuideClick = if (isAllowed) onAppGuideClick else null,
+        onAppGuideClick = onAppGuideClick,
     ) {
-        when (result) {
-            is LocationShareResult.Allowed -> LocationStatusCard(
-                title = stringResource(R.string.share_result_allowed),
-                address = result.address,
-                guide = stringResource(R.string.share_result_question),
-            ) {
-                CardButton(
-                    text = stringResource(R.string.share_result_set_waypoint),
-                    onClick = { onSetWaypoint(result) },
-                    modifier = Modifier.weight(1f),
-                )
-                CardButton(
-                    text = stringResource(R.string.share_result_set_destination),
-                    onClick = { onSetDestination(result) },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            is LocationShareResult.Denied -> MessageCard(stringResource(R.string.share_result_denied))
+        LocationStatusCard(
+            title = stringResource(R.string.share_result_allowed),
+            address = result.address,
+            guide = stringResource(R.string.share_result_question),
+        ) {
+            CardButton(
+                text = stringResource(R.string.share_result_set_waypoint),
+                onClick = { onSetWaypoint(result) },
+                modifier = Modifier.weight(1f),
+            )
+            CardButton(
+                text = stringResource(R.string.share_result_set_destination),
+                onClick = { onSetDestination(result) },
+                modifier = Modifier.weight(1f),
+            )
         }
     }
 }
@@ -91,15 +80,6 @@ fun LocationShareResultScreen(
 private fun AllowedPreview() {
     LocationShareResultScreen(
         result = LocationShareResult.Allowed("홍길동", "00시 00구 00로", 0.0, 0.0),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onSetWaypoint = {}, onSetDestination = {},
-    )
-}
-
-@Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
-@Composable
-private fun DeniedPreview() {
-    LocationShareResultScreen(
-        result = LocationShareResult.Denied("홍길동"),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onSetWaypoint = {}, onSetDestination = {},
+        onAppGuideClick = {}, onSettingsClick = {}, onSetWaypoint = {}, onSetDestination = {},
     )
 }

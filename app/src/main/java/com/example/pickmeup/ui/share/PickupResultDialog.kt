@@ -44,7 +44,7 @@ private val CompletedCheck = Color(0xFF02C265)
 
 /**
  * 픽업 종료 결과 팝업 (Figma 8-1 "픽업이 취소되었습니다" / 8-2 "픽업이 완료되었습니다", 750×520px).
- * 이미 처리된 결과를 알리는 팝업이라 바깥을 눌러도 닫히지 않고, 확인을 눌러야 메인으로 갑니다.
+ * 이미 처리된 결과를 알리는 팝업이라 바깥을 눌러도 닫히지 않고, 확인을 눌러야 첫 화면(픽업 불러오기)으로 갑니다.
  */
 @Composable
 internal fun PickupResultDialog(result: PickupResult, onConfirm: () -> Unit) {
@@ -53,11 +53,14 @@ internal fun PickupResultDialog(result: PickupResult, onConfirm: () -> Unit) {
             title = R.string.pickup_result_cancelled_title,
             description = R.string.pickup_result_cancelled_desc,
             circle = CancelledCircle,
+            descriptionGap = 11,
         )
         PickupResult.Completed -> ResultContent(
             title = R.string.pickup_result_completed_title,
             description = R.string.pickup_result_completed_desc,
             circle = CompletedCircle,
+            // Figma 8-2: 안내 문구가 8-1 보다 16px 아래 (top 273 vs 257)
+            descriptionGap = 27,
         )
     }
     DimOverlay {
@@ -99,13 +102,14 @@ internal fun PickupResultDialog(result: PickupResult, onConfirm: () -> Unit) {
                 style = astaStyle(48.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 64f / 48f),
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(11.px))
+            Spacer(Modifier.height(content.descriptionGap.px))
             Text(
                 text = stringResource(content.description),
                 style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(57.px))
+            // 버튼 top 382px 고정 (안내 문구 위치와 무관)
+            Spacer(Modifier.height((57 + 11 - content.descriptionGap).px))
             Box(
                 Modifier
                     .size(width = 540.px, height = 100.px)
@@ -127,6 +131,8 @@ private data class ResultContent(
     @StringRes val title: Int,
     @StringRes val description: Int,
     val circle: Color,
+    /** 제목과 안내 문구 사이 간격(px) */
+    val descriptionGap: Int,
 )
 
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
