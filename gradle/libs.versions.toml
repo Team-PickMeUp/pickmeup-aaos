@@ -16,6 +16,7 @@ kotlinxSerialization = "1.11.0"   # 1.12+ 는 Kotlin 2.4 필요
 coroutines = "1.11.0"
 retrofit = "3.0.0"
 okhttp = "5.5.1"
+naviHelper = "3.0.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,8 @@ retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = 
 retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+# Pleos
+pleos-navi-helper = { group = "ai.pleos.playground", name = "NaviHelper", version.ref = "naviHelper" }
 # Test
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 
