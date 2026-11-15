@@ -19,12 +19,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,7 +54,11 @@ import com.example.pickmeup.ui.design.isCompactLayout
 import com.example.pickmeup.ui.design.popupWidth
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
+import com.example.pickmeup.ui.location.LocationShareEvent
+import com.example.pickmeup.ui.location.LocationShareRequestOverlay
+import com.example.pickmeup.ui.location.LocationShareRequestState
 import com.example.pickmeup.ui.location.PhoneNumber
+import com.example.pickmeup.ui.location.WaitingTitle
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
@@ -64,25 +71,39 @@ private val CancelBg = Color(0xFFF1EFF9)
 private val EditBg = Color(0xFFF0EDFF)
 private val EditBorder = Color(0xFFD5CEFF)
 private val EditText = Color(0xFF5A46FA)
+private val Purple = Color(0xFF5A46FA)
 
 @Composable
 fun PickupTargetManageRoute(
     onBack: () -> Unit,
     onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onTargetSelected: (PickupTarget) -> Unit,
+    onResponseReceived: () -> Unit,
     viewModel: PickupTargetManageViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    // 삭제 / 수정 팝업이 열려 있으면 뒤로 가기로 팝업만 닫기
+    val shareState by viewModel.shareState.collectAsStateWithLifecycle()
+    // 삭제 / 추가·수정 / 확인 팝업이 열려 있으면 뒤로 가기로 팝업만 닫기
+    // (대기·결과 팝업은 LocationShareRequestOverlay 가 처리)
     BackHandler(enabled = uiState.pendingDelete != null, onBack = viewModel::onDeleteDismiss)
     BackHandler(enabled = uiState.editing != null, onBack = viewModel::onEditDismiss)
+    BackHandler(enabled = uiState.pendingConfirm != null, onBack = viewModel::onConfirmDismiss)
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                LocationShareEvent.Allowed -> onResponseReceived()
+                is LocationShareEvent.RequestFailed -> Unit // TODO: 실패 안내 UI (Figma 미정)
+            }
+        }
+    }
     PickupTargetManageScreen(
         uiState = uiState,
+        shareState = shareState,
         onBack = onBack,
         onAppGuideClick = onAppGuideClick,
         onSettingsClick = onSettingsClick,
-        onTargetSelected = onTargetSelected,
+        onTargetClick = viewModel::onTargetClick,
+        onAddClick = viewModel::onAddClick,
         onDeleteClick = viewModel::onDeleteClick,
         onDeleteDismiss = viewModel::onDeleteDismiss,
         onDeleteConfirm = viewModel::onDeleteConfirm,
@@ -91,12 +112,18 @@ fun PickupTargetManageRoute(
         onEditPhoneChange = viewModel::onEditPhoneChange,
         onEditDismiss = viewModel::onEditDismiss,
         onEditSave = viewModel::onEditSave,
+        onConfirmDismiss = viewModel::onConfirmDismiss,
+        onConfirmRequest = viewModel::onConfirmRequest,
+        onCancelRequest = viewModel::cancelRequest,
+        onDismissShareResult = viewModel::dismissShareResult,
     )
 }
 
 /**
  * 저장된 픽업 대상자 목록 (Figma 388:25033 "2-1-1", 삭제 확인 팝업 391:26088 "2-1-2", 수정 팝업 507:27177 "2-1-3").
- * - 대상자 줄 선택 → 위치 요청 (픽업 불러오기는 최근 3명만 보여서 나머지는 여기서 선택)
+ * - 대상자 줄 선택 → 확인 팝업 → 이 화면에서 바로 위치 요청 + 대기 팝업 (Figma 2-1-5).
+ *   픽업 불러오기는 최근 3명만 보여서 나머지는 여기서 선택
+ * - "+ 추가" → 입력 팝업 (Figma 2-1-1-1) → 저장하면 목록에 추가하고 바로 확인 팝업 (Figma 2-1-1-2)
  * - 수정 → 이름·전화번호 수정 팝업 → 저장하면 목록에 바로 반영 (순서는 그대로)
  * - 삭제 → 확인 팝업 → 삭제하면 목록이 자동으로 당겨짐
  * - 저장된 대상자가 없으면 빈 목록 안내
@@ -104,10 +131,12 @@ fun PickupTargetManageRoute(
 @Composable
 fun PickupTargetManageScreen(
     uiState: PickupTargetManageUiState,
+    shareState: LocationShareRequestState,
     onBack: () -> Unit,
     onAppGuideClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onTargetSelected: (PickupTarget) -> Unit,
+    onTargetClick: (PickupTarget) -> Unit,
+    onAddClick: () -> Unit,
     onDeleteClick: (PickupTarget) -> Unit,
     onDeleteDismiss: () -> Unit,
     onDeleteConfirm: () -> Unit,
@@ -116,6 +145,10 @@ fun PickupTargetManageScreen(
     onEditPhoneChange: (String) -> Unit,
     onEditDismiss: () -> Unit,
     onEditSave: () -> Unit,
+    onConfirmDismiss: () -> Unit,
+    onConfirmRequest: () -> Unit,
+    onCancelRequest: () -> Unit,
+    onDismissShareResult: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ProvideDesignScale(
@@ -155,12 +188,47 @@ fun PickupTargetManageScreen(
                     style = astaStyle(56.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 72f / 56f),
                     textAlign = TextAlign.Center,
                 )
-                Spacer(Modifier.height(if (compact) 72.px else 134.px))
+                // Figma: 제목 아래 22px 에 보조 문구(26px), 그 아래 22px 에 "+ 추가" (목록 오른쪽 끝 = 삭제 버튼 오른쪽 끝)
+                Spacer(Modifier.height(22.px))
+                Text(
+                    text = stringResource(R.string.pickup_targets_manage_subtitle),
+                    style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(22.px))
+                Box(
+                    Modifier
+                        .widthIn(max = 1330.px)
+                        .fillMaxWidth()
+                        .padding(end = if (compact) 34.px else 54.px),
+                    contentAlignment = Alignment.CenterEnd,
+                ) {
+                    PopupButton(
+                        text = stringResource(R.string.pickup_targets_manage_add),
+                        background = Purple,
+                        textColor = Color.White,
+                        fontSize = 28,
+                        lineHeight = 40,
+                        onClick = onAddClick,
+                        modifier = Modifier.size(width = if (compact) 150.px else 190.px, height = 69.px),
+                        cornerRadius = 16,
+                    )
+                }
+                Spacer(Modifier.height(if (compact) 32.px else 47.px))
                 if (uiState.targets.isEmpty()) {
                     EmptyNotice()
                 } else {
+                    val listState = rememberLazyListState()
+                    // 새 대상자는 목록 맨 위에 추가됨 → 스크롤돼 있어도 보이도록 맨 위로 (삭제·수정 때는 그대로)
+                    val knownIds = remember { mutableSetOf<String>() }
+                    val topId = uiState.targets.first().id
+                    LaunchedEffect(topId) {
+                        if (knownIds.isNotEmpty() && topId !in knownIds) listState.animateScrollToItem(0)
+                        knownIds += uiState.targets.map { it.id }
+                    }
                     LazyColumn(
-                        Modifier
+                        state = listState,
+                        modifier = Modifier
                             .widthIn(max = 1330.px)
                             .fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(23.px),
@@ -169,7 +237,7 @@ fun PickupTargetManageScreen(
                         items(uiState.targets, key = { it.id }) { target ->
                             TargetRow(
                                 target = target,
-                                onClick = { onTargetSelected(target) },
+                                onClick = { onTargetClick(target) },
                                 onEditClick = { onEditClick(target) },
                                 onDeleteClick = { onDeleteClick(target) },
                                 modifier = Modifier.animateItem(),
@@ -196,6 +264,15 @@ fun PickupTargetManageScreen(
                     onSave = onEditSave,
                 )
             }
+            uiState.pendingConfirm?.let { target ->
+                RequestConfirmDialog(target = target, onDismiss = onConfirmDismiss, onConfirm = onConfirmRequest)
+            }
+            LocationShareRequestOverlay(
+                state = shareState,
+                onCancelRequest = onCancelRequest,
+                onDismissResult = onDismissShareResult,
+                waitingTitle = WaitingTitle.Long,
+            )
         }
     }
 }
@@ -429,9 +506,11 @@ private val previewTargets = listOf(
 private fun PickupTargetManagePreview() {
     PickupTargetManageScreen(
         uiState = PickupTargetManageUiState(targets = previewTargets),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
+        shareState = LocationShareRequestState.Idle,
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetClick = {}, onAddClick = {},
         onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
         onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+        onConfirmDismiss = {}, onConfirmRequest = {}, onCancelRequest = {}, onDismissShareResult = {},
     )
 }
 
@@ -440,9 +519,11 @@ private fun PickupTargetManagePreview() {
 private fun PickupTargetManageCompactPreview() {
     PickupTargetManageScreen(
         uiState = PickupTargetManageUiState(targets = previewTargets),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
+        shareState = LocationShareRequestState.Idle,
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetClick = {}, onAddClick = {},
         onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
         onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+        onConfirmDismiss = {}, onConfirmRequest = {}, onCancelRequest = {}, onDismissShareResult = {},
     )
 }
 
@@ -451,9 +532,11 @@ private fun PickupTargetManageCompactPreview() {
 private fun PickupTargetManageEmptyPreview() {
     PickupTargetManageScreen(
         uiState = PickupTargetManageUiState(),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
+        shareState = LocationShareRequestState.Idle,
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetClick = {}, onAddClick = {},
         onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
         onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+        onConfirmDismiss = {}, onConfirmRequest = {}, onCancelRequest = {}, onDismissShareResult = {},
     )
 }
 
@@ -462,9 +545,11 @@ private fun PickupTargetManageEmptyPreview() {
 private fun PickupTargetDeleteDialogPreview() {
     PickupTargetManageScreen(
         uiState = PickupTargetManageUiState(targets = previewTargets, pendingDelete = previewTargets[0]),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
+        shareState = LocationShareRequestState.Idle,
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetClick = {}, onAddClick = {},
         onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
         onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+        onConfirmDismiss = {}, onConfirmRequest = {}, onCancelRequest = {}, onDismissShareResult = {},
     )
 }
 
@@ -477,8 +562,39 @@ private fun PickupTargetEditDialogPreview() {
             targets = previewTargets,
             editing = ProfileEditState(target, target.name, target.phoneDigits),
         ),
-        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
+        shareState = LocationShareRequestState.Idle,
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetClick = {}, onAddClick = {},
         onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
         onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+        onConfirmDismiss = {}, onConfirmRequest = {}, onCancelRequest = {}, onDismissShareResult = {},
+    )
+}
+
+@Preview(name = "2-1-1-1 추가", widthDp = 1700, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetAddDialogPreview() {
+    PickupTargetManageScreen(
+        uiState = PickupTargetManageUiState(
+            targets = previewTargets,
+            editing = ProfileEditState(target = null, name = "", phoneDigits = ""),
+        ),
+        shareState = LocationShareRequestState.Idle,
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetClick = {}, onAddClick = {},
+        onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
+        onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+        onConfirmDismiss = {}, onConfirmRequest = {}, onCancelRequest = {}, onDismissShareResult = {},
+    )
+}
+
+@Preview(name = "2-1-5 대기", widthDp = 1700, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetWaitingPreview() {
+    PickupTargetManageScreen(
+        uiState = PickupTargetManageUiState(targets = previewTargets),
+        shareState = LocationShareRequestState.Waiting(remainingSeconds = 300),
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetClick = {}, onAddClick = {},
+        onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
+        onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+        onConfirmDismiss = {}, onConfirmRequest = {}, onCancelRequest = {}, onDismissShareResult = {},
     )
 }

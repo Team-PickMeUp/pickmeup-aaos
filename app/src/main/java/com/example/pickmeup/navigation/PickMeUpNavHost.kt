@@ -82,9 +82,8 @@ fun PickMeUpNavHost(
                 onBack = navController.backFrom(entry),
                 onAppGuideClick = { navController.navigateSingle(AppGuideDestination) },
                 onSettingsClick = { navController.navigateSingle(SettingsDestination) },
-                onTargetSelected = { target ->
-                    navController.navigate(LocationRequestDestination(target.name, target.phoneDigits))
-                },
+                // 대상자 선택(또는 추가) → 확인 팝업 → 이 화면에서 바로 요청 → 허용되면 경유지 / 목적지 선택
+                onResponseReceived = { navController.navigateSingle(ShareResultDestination) },
             )
         }
 
