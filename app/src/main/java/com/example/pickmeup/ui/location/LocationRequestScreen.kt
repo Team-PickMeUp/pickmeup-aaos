@@ -25,6 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -119,8 +122,12 @@ fun LocationRequestScreen(
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val name = uiState.name
     val phoneDigits = uiState.phoneDigits
+    // 이름은 화면이 입력 상태를 직접 들고 있어야 한글 조합 중 표시(composition)가 유지됨.
+    // 매번 TextFieldValue 를 새로 만들면 조합 중이던 글자가 확정돼 "ㄱ기김김…"처럼 깨짐
+    var nameField by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(uiState.name, TextRange(uiState.name.length)))
+    }
 
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
@@ -184,8 +191,11 @@ fun LocationRequestScreen(
                         LabeledInput(
                             label = stringResource(R.string.location_request_name_label),
                             placeholder = stringResource(R.string.location_request_name_hint),
-                            value = TextFieldValue(name, TextRange(name.length)),
-                            onValueChange = { onNameChange(it.text) },
+                            value = nameField,
+                            onValueChange = {
+                                nameField = it
+                                onNameChange(it.text)
+                            },
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(
                                 onNext = { focusManager.moveFocus(FocusDirection.Down) },

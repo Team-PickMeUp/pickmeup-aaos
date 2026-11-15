@@ -18,6 +18,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -73,6 +77,8 @@ internal fun ProfileEditDialog(
 ) {
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
+    // 이름은 팝업이 입력 상태를 직접 들고 있어야 한글 조합 중 표시(composition)가 유지됨
+    var nameField by remember { mutableStateOf(TextFieldValue(state.name, TextRange(state.name.length))) }
 
     DimOverlay {
         val shape = RoundedCornerShape(32.px)
@@ -107,15 +113,19 @@ internal fun ProfileEditDialog(
             }
             EditField(
                 label = stringResource(R.string.location_request_name_label),
-                value = state.name,
-                onValueChange = onNameChange,
+                value = nameField,
+                onValueChange = {
+                    nameField = it
+                    onNameChange(it.text)
+                },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
             )
             EditField(
                 label = stringResource(R.string.location_request_phone_label),
-                value = PhoneNumber.format(state.phoneDigits),
-                onValueChange = onPhoneChange,
+                // 전화번호는 숫자만 받아 하이픈을 자동으로 넣으므로 커서는 항상 끝 (조합 입력 없음)
+                value = PhoneNumber.format(state.phoneDigits).let { TextFieldValue(it, TextRange(it.length)) },
+                onValueChange = { onPhoneChange(it.text) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
                     onDone = {
@@ -153,8 +163,8 @@ internal fun ProfileEditDialog(
 @Composable
 private fun EditField(
     label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     keyboardOptions: KeyboardOptions,
     keyboardActions: KeyboardActions,
 ) {
@@ -165,9 +175,8 @@ private fun EditField(
         )
         val shape = RoundedCornerShape(16.px)
         BasicTextField(
-            // 커서는 항상 끝 (전화번호는 하이픈이 자동으로 들어가서 위치를 유지하기 어려움)
-            value = TextFieldValue(value, TextRange(value.length)),
-            onValueChange = { onValueChange(it.text) },
+            value = value,
+            onValueChange = onValueChange,
             singleLine = true,
             textStyle = astaStyle(30.pxSp, FontWeight.Normal, PickMeUpColors.TextPrimary, 38f / 30f),
             cursorBrush = SolidColor(Purple),
