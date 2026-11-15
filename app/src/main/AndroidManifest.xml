@@ -28,6 +28,15 @@
             android:exported="true"
             android:theme="@style/Theme.PickMeUp"
             android:windowSoftInputMode="adjustResize">
+            <!--
+              주행 중 사용 가능(Distraction Optimized) 선언.
+              선언하지 않으면 기어 D 에서 Pleos 가 "주행 중에는 사용할 수 없습니다" 화면으로 앱을 막음.
+              TODO: 정식 출시 전 CarUxRestrictions 로 주행 상태별 기능 제한 필요
+                    (예: 주행 중 키보드 입력 금지). 선언만 하면 시스템이 앱을 전부 허용함.
+            -->
+            <meta-data
+                android:name="distractionOptimized"
+                android:value="true" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

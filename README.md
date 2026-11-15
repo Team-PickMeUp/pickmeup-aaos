@@ -132,6 +132,9 @@ app/src/main/java/com/example/pickmeup/
   ```
 - 상태바·GNB는 Pleos 시스템이 그림, 앱 영역은 약 1700×1184
 - **Toast 표시 안 됨** → 사용자 안내는 화면 내 UI로 처리
+- 주행 중(기어 D) 사용: `MainActivity`에 Distraction Optimized 선언 → 차단되지 않음
+  - 기어 변경은 Pleos Connect Virtual Console: `adb forward tcp:8088 tcp:8088` 후 브라우저에서 http://localhost:8088 (페이지를 열어둔 동안만 조작 반영)
+  - 주행 상태별 기능 제한(`CarUxRestrictions`)은 아직 없음 (정식 출시 전 필요)
 
 ## 협업 컨벤션
 
