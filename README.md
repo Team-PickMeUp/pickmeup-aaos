@@ -1,9 +1,148 @@
+<div align="center">
+
+<img src="docs/images/app_icon.png" width="120" alt="PickMeUp 앱 아이콘" />
+
 # PickMeUp (AAOS)
 
-Pleos Connect(Android Automotive OS) 차량 앱
+**Pleos Connect(Android Automotive OS) 차량 앱**<br />
+운전자가 차량 화면에서 픽업 대상자의 위치를 받아, 바로 내비 길안내까지 이어줍니다.
+
+<br />
+
+<img src="docs/images/overview_split.png" width="900" alt="화면 3분할: 운전자 보조 화면 | PickMeUp | 내비게이션" />
+
+<sub>Pleos Connect 화면 3분할 (운전자 보조 화면 | <b>PickMeUp</b> | 내비게이션) — 픽업 대상자 메시지를 알림 카드와 음성으로 안내</sub>
+
+</div>
+
+<br />
 
 - 운전자가 차량 화면에서 픽업 대상자에게 **위치 공유 요청**
 - 공유받은 위치를 **경유지/목적지로 설정**해 픽업 진행
+- 픽업 대상자의 상황 메시지를 **알림 카드 + 음성(TTS)** 으로 안내
+
+## 개발 환경 · 화면 규격
+
+### Pleos Connect 에뮬레이터
+
+| 항목 | 내용 |
+|---|---|
+| 에뮬레이터 버전 | **Pleos Connect v2.1.0** (`RELEASE.release_connect_v2.1.0`) |
+| 시스템 이미지 | `pleos_car_emulator` arm64-v8a (42dot Inc., Android Automotive) |
+| Android | Android 14 (API 34) |
+| Android Emulator | 37.2.13.0 |
+| 개발 도구 | Android Studio 2026.2 |
+
+### 화면 규격
+
+| 항목 | 규격 |
+|---|---|
+| 차량 디스플레이 | **2560 × 1440 px**, 160 dpi (Connect-S 17", 16:9, Landscape) |
+| 앱 영역 — 1:2 (운전자 보조 화면 \| 앱) | **1700 × 1184 dp** |
+| 앱 영역 — 1:1:1 화면 3분할 (운전자 보조 화면 \| 앱 \| 내비) | **840 × 1184 dp** |
+| 디자인 기준 | [Figma 와이어프레임](https://www.figma.com/design/ViO6HZxZ5M1Vc2ulAEdzDF) (2560 × 1440), Pleos Connect display guide 2.1.5 |
+
+- 상태바와 하단 GNB는 Pleos 시스템이 그리고, 앱은 그 사이 영역만 사용
+- Figma px를 앱 영역 너비 기준으로 dp 변환 → 화면 크기·dpi가 다른 폼팩터에서도 같은 비율로 표시 ([화면 3분할 · 폼팩터 대응](#화면-3분할--폼팩터-대응))
+
+## 주요 기능
+
+### 픽업 대상자 불러오기 · 위치 요청
+
+자주 태우는 사람은 프로필로 저장해 두고 카드 한 번으로 위치를 요청합니다.
+요청 후 대상자가 응답할 때까지 5분 카운트다운을 보여주고, 응답이 없거나 거부하면 팝업으로 알려줍니다.
+
+<p align="center">
+  <img src="docs/images/01_select.png" width="260" alt="픽업 대상자 불러오기" />
+  <img src="docs/images/02_confirm.png" width="260" alt="위치 요청 확인 팝업" />
+  <img src="docs/images/03_waiting.png" width="260" alt="위치 공유 대기 팝업" />
+</p>
+
+### 새 픽업 대상자 입력 · 프로필 관리
+
+처음 태우는 사람은 이름과 전화번호만 입력합니다. 전화번호는 하이픈이 자동으로 들어가고, 휴대전화 형식일 때만 요청 버튼이 켜집니다.
+"다음 픽업을 위해 대상자 저장"을 체크하면 첫 화면에 카드로 저장되고, 목록에서 수정·삭제할 수 있습니다.
+
+<p align="center">
+  <img src="docs/images/04_request.png" width="260" alt="새 픽업 대상자 입력" />
+  <img src="docs/images/05_manage.png" width="260" alt="전체 프로필 보기·관리" />
+  <img src="docs/images/13_edit.png" width="260" alt="프로필 정보 수정 팝업" />
+</p>
+
+### 경유지 / 목적지 설정 → 내비 길안내
+
+대상자가 위치 공유를 허용하면 주소가 표시되고, **경유지** 또는 **목적지**로 바로 설정할 수 있습니다.
+Pleos **NaviHelper SDK**로 내비게이션에 위치를 넘기면 내비가 경로를 탐색하고 안내를 시작합니다.
+「경유지로 설정하기」는 길안내 중이면 기존 목적지를 그대로 두고 경유지로 추가하고, 길안내 중이 아니면 목적지로 설정합니다.
+
+<p align="center">
+  <img src="docs/images/06_allowed.png" width="260" alt="경유지/목적지 선택" />
+  <img src="docs/images/07_navi_route.png" width="520" alt="내비 경로 탐색" />
+</p>
+
+### 픽업 진행 · 대상자 메시지 음성 안내
+
+길안내 중에는 대상자의 상황 메시지("가는 중", "거의 도착", "대기 중")가 화면 위에서 알림 카드로 내려오고, Pleos **TextToSpeech SDK**로 읽어줍니다.
+알림 카드는 음성 안내가 끝날 때까지만 보이고, 픽업 위치에 도착하면 화면 문구가 도착 안내로 바뀝니다. 픽업 완료·취소 시 내비 길안내도 함께 종료됩니다.
+
+<p align="center">
+  <img src="docs/images/08_message.png" width="260" alt="대상자 메시지 알림 카드 + TTS" />
+  <img src="docs/images/09_arrived.png" width="260" alt="픽업 위치 도착" />
+  <img src="docs/images/10_done.png" width="260" alt="픽업 완료" />
+</p>
+
+### 약관 동의 · 앱 사용 가이드 · 설정
+
+첫 실행 시 필수 약관 동의를 받고, 처음 쓰는 운전자를 위해 3단계 사용 가이드를 제공합니다. 설정에서 가이드와 약관을 다시 볼 수 있습니다.
+
+<p align="center">
+  <img src="docs/images/00_terms.png" width="260" alt="최초 실행 약관 동의" />
+  <img src="docs/images/11_guide.png" width="260" alt="앱 사용 가이드 1단계" />
+  <img src="docs/images/12_settings.png" width="260" alt="설정" />
+</p>
+<p align="center">
+  <img src="docs/images/14_guide2.png" width="260" alt="앱 사용 가이드 2단계" />
+  <img src="docs/images/15_guide3.png" width="260" alt="앱 사용 가이드 3단계" />
+</p>
+
+## 시연 시나리오
+
+기본 설정(`pickmeup.api.useFake=true`)에서는 대상자 응답과 메시지를 정해진 시간에 재생합니다. 내비 연동은 실제 Pleos 내비를 사용합니다.
+
+| 시점 | 동작 |
+|---|---|
+| 위치 요청 | 대상자가 위치 공유 허용 → 경유지 / 목적지 선택 화면 |
+| 경유지·목적지 설정 | Pleos 내비에 위치 전달 → 경로 탐색 · 길안내 시작 → 픽업 진행 중 화면 |
+| +5초 | 알림 카드 + 음성 "픽업 대상자가 픽업 위치로 가는 중이라고 알렸어요" |
+| +10초 | 알림 카드 + 음성 "픽업 대상자가 거의 다 도착했다고 알렸어요" |
+| +15초 | 알림 카드 + 음성 "픽업 대상자가 픽업장소에서 대기중이라고 알렸어요" |
+| +20초 | 픽업 위치 도착 → 화면 문구가 도착 안내로 변경 |
+| 픽업 완료 / 취소 | 결과 팝업 + 내비 길안내 종료 → 첫 화면 |
+
+- 알림 카드는 음성 안내 길이만큼 보이고, 알림 사이에는 2초 간격을 둠
+- 주행 중(기어 D)에도 사용할 수 있도록 Distraction Optimized 선언
+
+## 화면 3분할 · 폼팩터 대응
+
+Pleos Connect display guide 2.1.5의 폼팩터 기준에 맞춰, 앱 영역 크기가 달라져도 화면이 창을 채우도록 만들었습니다.
+
+| 폼팩터 | Landscape (1:2) | Portrait (1:1:1, 화면 3분할) |
+|---|---|---|
+| **Connect-S-17 (개발 기준)** | **1700 × 1184** | **840 × 1184** |
+| Connect-S-15.6 | 1408 × 1018 | 692 × 1018 |
+| Connect-S-14.6 | 1360 × 948 | 672 × 948 |
+| Connect-L-12.9 | 1274 × 855 | 628 × 855 |
+| Connect-W-Standard | 1640 × 810 | 800 × 810 |
+| Connect-W-Extended | 1640 × 1400 | 800 × 1400 |
+| Connect-WF | 1256 × 800 | 648 × 800 |
+
+<sub>단위 dp, 출처: Pleos Connect display guide 2.1.5 「Form factors」</sub>
+
+- 배율: `ui/design/DesignScale.kt`에서 Figma px → dp 비율을 앱 영역 크기로 계산
+  - Landscape는 1700px, 화면 3분할(창 너비 < 1000dp)은 840px을 앱 영역 너비로 봄
+  - 창 높이 비율도 반영 → 높이가 낮은 Connect-W에서도 넘치지 않음
+- 좁은 창: 카드 2열 배치, 팝업 폭 축소, 가이드 세로 배치, 긴 문구 여러 줄 처리
+- 가독성: Pleos 타이포그래피 가이드에 따라 글자는 18px 아래로 줄지 않고, 한국어는 어절 단위로 줄바꿈
 
 ## 기술 스택
 
@@ -17,6 +156,7 @@ Pleos Connect(Android Automotive OS) 차량 앱
 | 네트워크 | Retrofit 3, OkHttp 5, kotlinx.serialization |
 | 빌드 | AGP 9.5, Gradle Version Catalog, KSP |
 | 플랫폼 | Android Automotive OS, minSdk 34 / targetSdk 37 |
+| 차량 연동 | Pleos NaviHelper 3.0.5, Pleos TextToSpeech 3.3.1 |
 | 디자인 | [Figma 와이어프레임](https://www.figma.com/design/ViO6HZxZ5M1Vc2ulAEdzDF) |
 
 ## 아키텍처 (MVVM)
@@ -52,9 +192,11 @@ app/src/main/java/com/example/pickmeup/
 │   ├── pickup/              # 픽업 저장소 (Fake / Remote)
 │   ├── target/              # 저장된 픽업 대상자 (SharedPreferences, 백업 제외)
 │   ├── navi/                # Pleos 내비 연동 (NaviHelper SDK / Fake)
+│   ├── tts/                 # Pleos 음성 안내 (TextToSpeech SDK)
+│   ├── message/             # 픽업 대상자 상황 메시지 (시연용 Fake)
 │   └── remote/              # Retrofit API, DTO
 └── ui/
-    ├── design/              # Figma px → dp/sp 변환 (기준 너비 1700px)
+    ├── design/              # Figma px → dp/sp 변환 (Landscape 1700px / 화면 3분할 840px 기준)
     ├── theme/               # 색상, 폰트(Asta Sans), 텍스트 스타일
     ├── components/          # 공통 컴포넌트 (헤더, 설정 버튼)
     ├── terms/               # 약관 동의 / 약관 상세
@@ -84,6 +226,8 @@ app/src/main/java/com/example/pickmeup/
 | | Retrofit kotlinx.serialization Converter | 3.0.0 | Retrofit ↔ kotlinx.serialization 연결 |
 | | OkHttp Logging Interceptor | 5.5.1 | debug 빌드 요청/응답 로그 |
 | | kotlinx.serialization JSON | 1.11.0 | JSON 직렬화, Navigation 경로 직렬화 |
+| 차량 연동 | Pleos NaviHelper | 3.0.5 | 내비 목적지·경유지 설정, 안내 상태 수신, 안내 종료 |
+| | Pleos TextToSpeech | 3.3.1 | 대상자 메시지 음성 안내 |
 | 테스트 | JUnit 4 | 4.13.2 | 단위 테스트 |
 | | kotlinx-coroutines-test | 1.11.0 | ViewModel(코루틴) 테스트 |
 
@@ -104,24 +248,80 @@ app/src/main/java/com/example/pickmeup/
 
 ## 실행 방법
 
-1. Android Studio로 프로젝트 열기
-2. Pleos 에뮬레이터(API 34) 실행
-3. `app` 구성 실행
+### 1. 준비물
+
+| 항목 | 버전 |
+|---|---|
+| Android Studio | 2026.2 이상 (Gradle 9.6 · AGP 9.5.1, JDK는 Android Studio 내장 JBR 사용) |
+| Android SDK Platform | API 37 (`compileSdk 37`) |
+| Pleos Connect 에뮬레이터 | v2.1.0 (Android 14, API 34) |
+
+### 2. Pleos Connect 에뮬레이터 설치
+
+1. Android Studio → **Settings → Languages & Frameworks → Android SDK → SDK Update Sites** → `+`
+   - Name: `Pleos Connect System Image`
+   - URL: `https://nexus-playground.pleos.ai/repository/raw-releases/connect-avd/2.x/crp-arm64-sys-img.xml`
+2. **SDK Platforms** 탭 → `Show Package Details` → Android 14 (API 34) 아래 Pleos Connect 시스템 이미지(`pleos_car_emulator`, 42dot Inc.) 설치
+3. **Device Manager → Create Virtual Device** → Automotive 기기, 위 시스템 이미지 선택
+   - 개발에 사용한 AVD: `Pleos_Connect_v2.1.0` (2560 × 1440, 160 dpi, Landscape, RAM 8GB)
+4. 에뮬레이터 실행
+
+### 3. 프로젝트 받기
 
 ```bash
-./gradlew assembleDebug     # 빌드
-./gradlew testDebugUnitTest # 단위 테스트
+git clone https://github.com/Team-PickMeUp/pickmeup-aaos.git
 ```
 
-### API 설정 (`local.properties`)
+Android Studio에서 `pickmeup-aaos` 폴더를 열고 Gradle Sync가 끝날 때까지 기다립니다.
+Pleos SDK(NaviHelper, TextToSpeech)는 `settings.gradle.kts`에 등록된 Pleos Maven 저장소에서 자동으로 받습니다.
+
+### 4. API 설정 (`local.properties`)
+
+프로젝트 루트의 `local.properties`에 필요한 값을 적습니다. 이 파일은 git에 올라가지 않습니다.
+아무것도 적지 않으면 시연용 기본값으로 실행됩니다.
+
+```properties
+# 예시 (모두 선택)
+pickmeup.api.useFake=true
+pickmeup.tts.clientId=발급받은_Client_ID
+pickmeup.tts.clientSecret=발급받은_Client_Secret
+```
 
 | 키 | 기본값 | 설명 |
 |---|---|---|
-| `pickmeup.api.useFake` | `true` | `true`면 가짜 저장소 사용 (위치 요청이 항상 즉시 '허용') |
+| `pickmeup.api.useFake` | `true` | `true`면 가짜 저장소 사용 (위치 요청이 항상 즉시 '허용', 대상자 메시지는 시연 타이밍으로 재생) |
 | `pickmeup.api.baseUrl` | `http://10.0.2.2:8080/` | API 주소 (기본값: 에뮬레이터에서 본 PC의 `localhost:8080`) |
 | `pickmeup.navi.useFake` | `false` | `true`면 가짜 내비 사용 (Pleos 내비 서비스가 없는 일반 에뮬레이터용) |
+| `pickmeup.tts.clientId` | (없음) | Pleos TextToSpeech Client ID — 없으면 음성 없이 알림 카드만 표시 |
+| `pickmeup.tts.clientSecret` | (없음) | Pleos TextToSpeech Client Secret |
 
 - http(비암호화) 접속은 debug 빌드에서 `10.0.2.2`, `localhost`만 허용
+
+### 5. 빌드 · 실행
+
+**Android Studio**: 에뮬레이터를 켠 상태에서 `app` 구성 실행(▶)
+
+**명령줄**:
+
+```bash
+./gradlew assembleDebug        # 빌드 (app/build/outputs/apk/debug/app-debug.apk)
+./gradlew installDebug         # 에뮬레이터에 설치
+adb shell am start --user 10 -n com.example.pickmeup/.MainActivity   # 실행 (Pleos 앱은 사용자 10)
+./gradlew testDebugUnitTest    # 단위 테스트
+```
+
+- 앱 목록(GNB의 앱 버튼)에서 **PickMeUp** 아이콘으로도 실행할 수 있습니다.
+- 화면 3분할(1:1:1)에서는 앱이 가운데 840 × 1184 영역에 실행되며, 레이아웃은 창 크기에 맞춰 자동으로 바뀝니다.
+
+### 6. 시연 순서
+
+1. **약관 동의**: 첫 실행 시 필수 약관 3개 동의 → "동의하고 시작하기"
+2. **위치 요청**: 첫 화면에서 "새 픽업 대상자 입력" → 이름·전화번호 입력 (저장하려면 "다음 픽업을 위해 대상자 저장" 체크) → "위치요청하기"
+   - 저장된 대상자가 있으면 첫 화면의 카드를 눌러 바로 요청
+3. **위치 공유 허용**: 대기 팝업 후 "픽업 대상자가 위치 공유를 허용했어요" 화면으로 이동
+4. **길안내 시작**: "목적지로 설정하기" (또는 "경유지로 설정하기") → 내비가 경로를 탐색하고 안내 시작
+5. **픽업 진행**: 5 / 10 / 15초에 대상자 메시지 알림 카드 + 음성 안내, 20초에 도착 안내 ([시연 시나리오](#시연-시나리오))
+6. **픽업 완료**: "픽업 완료하기" → 완료 팝업 "확인" → 내비 안내 종료, 첫 화면으로
 
 ### Pleos 에뮬레이터 참고사항
 
@@ -130,7 +330,7 @@ app/src/main/java/com/example/pickmeup/
   ```bash
   adb shell pm clear --user 10 com.example.pickmeup
   ```
-- 상태바·GNB는 Pleos 시스템이 그림, 앱 영역은 약 1700×1184
+- 상태바·GNB는 Pleos 시스템이 그림, 앱 영역은 1700×1184 (화면 3분할 시 840×1184)
 - **Toast 표시 안 됨** → 사용자 안내는 화면 내 UI로 처리
 - 주행 중(기어 D) 사용: `MainActivity`에 Distraction Optimized 선언 → 차단되지 않음
   - 기어 변경은 Pleos Connect Virtual Console: `adb forward tcp:8088 tcp:8088` 후 브라우저에서 http://localhost:8088 (페이지를 열어둔 동안만 조작 반영)
