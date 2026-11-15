@@ -22,6 +22,10 @@ val useFakeNavi = localProps.getProperty("pickmeup.navi.useFake")?.toBoolean() ?
 // 둘 다 있으면 HYBRID 모드(서버 TTS + 실패 시 온디바이스), 없으면 등록이 필요 없는 ON_DEVICE 모드
 val ttsClientId = localProps.getProperty("pickmeup.tts.clientId").orEmpty()
 val ttsClientSecret = localProps.getProperty("pickmeup.tts.clientSecret").orEmpty()
+// 릴리스 서명: 프로젝트 루트 keystore.properties (git 에 올리지 않음). 없으면 release 는 서명되지 않은 APK 로 빌드됩니다.
+val keystoreProps = Properties().apply {
+    rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+}
 
 android {
     namespace = "com.example.pickmeup"
@@ -45,8 +49,20 @@ android {
         buildConfigField("String", "TTS_CLIENT_SECRET", "\"$ttsClientSecret\"")
     }
 
+    signingConfigs {
+        if (keystoreProps.getProperty("storeFile") != null) {
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             optimization {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
