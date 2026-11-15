@@ -48,7 +48,17 @@ class LocationRequestViewModel @Inject constructor(
         requester.state,
     ) { name, phone, save, shareState ->
         LocationRequestUiState(name, phone, save, shareState)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, LocationRequestUiState())
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        // 첫 화면부터 저장된 값이 보이도록 초기값도 SavedStateHandle 에서 바로 읽음
+        // (이름 입력란은 첫 값으로 입력 상태를 만들기 때문에 빈 값으로 시작하면 미리 채운 이름이 사라짐)
+        LocationRequestUiState(
+            name = savedStateHandle[KEY_NAME] ?: "",
+            phoneDigits = savedStateHandle[KEY_PHONE] ?: "",
+            saveForNext = savedStateHandle[KEY_SAVE] ?: false,
+        ),
+    )
 
     /** 허용 → 경유지 / 목적지 선택 화면으로, 실패 → 안내 */
     val events: Flow<LocationShareEvent> = requester.events
