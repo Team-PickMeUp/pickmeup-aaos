@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,11 +16,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,7 +49,10 @@ import com.example.pickmeup.ui.components.DimOverlay
 import com.example.pickmeup.ui.components.GuideButton
 import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.components.consumeClicks
+import com.example.pickmeup.ui.design.LocalPxScale
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.isCompactLayout
+import com.example.pickmeup.ui.design.popupWidth
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.location.LocationShareEvent
@@ -109,6 +117,7 @@ fun PickupTargetSelectRoute(
  * 픽업 불러오기 화면 — 앱 첫 화면 (Figma 372:22957 "2-1 프로필 불러오는 화면").
  * 저장된 대상자 카드(최대 3개) + "새 픽업 대상자 입력" 카드를 가운데 정렬로 보여줍니다.
  * 저장된 대상자가 없으면 입력 카드만 보입니다. 첫 화면이라 뒤로 가기 버튼이 없습니다.
+ * 좁은 창(화면 3분할, 840px)에서는 카드를 0.85배로 줄여 한 줄에 2개씩 놓습니다. 그래도 넘치면 세로 스크롤.
  *
  * - 프로필 선택 → 확인 팝업 (Figma 2-1-4) → "위치 요청하기" → 대기 팝업 (Figma 2-1-4-1)
  * - 허용되면 경유지 / 목적지 선택 화면으로, 자동 취소·거부면 팝업 확인 후 이 화면에 머묾
@@ -134,24 +143,14 @@ fun PickupTargetSelectScreen(
             .fillMaxSize()
             .background(PickMeUpColors.BackgroundPrimary),
     ) {
+        val compact = isCompactLayout
         Box(Modifier.fillMaxSize()) {
-            GuideButton(
-                onClick = onAppGuideClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 23.px, end = 101.px),
-            )
-            SettingsButton(
-                onClick = onSettingsClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 23.px, end = 23.px),
-            )
-
             Column(
                 Modifier
-                    .fillMaxWidth()
-                    .padding(top = 252.px),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 64.px)
+                    .padding(top = if (compact) 112.px else 252.px, bottom = 64.px),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -165,16 +164,37 @@ fun PickupTargetSelectScreen(
                     style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
                     textAlign = TextAlign.Center,
                 )
-                Spacer(Modifier.height(77.px))
-                Row(horizontalArrangement = Arrangement.spacedBy(32.px)) {
-                    targets.forEach { target ->
-                        TargetCard(target = target, onClick = { onTargetClick(target) })
+                Spacer(Modifier.height(if (compact) 48.px else 77.px))
+                // 좁은 창: 카드 4장(2×2)이 한 화면에 들어가도록 카드 영역만 0.85배
+                val cardScale = LocalPxScale.current * if (compact) COMPACT_CARD_SCALE else 1f
+                CompositionLocalProvider(LocalPxScale provides cardScale) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(32.px, Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.spacedBy(32.px),
+                        maxItemsInEachRow = if (compact) 2 else Int.MAX_VALUE,
+                    ) {
+                        targets.forEach { target ->
+                            TargetCard(target = target, onClick = { onTargetClick(target) })
+                        }
+                        ManualInputCard(onClick = onManualInputClick)
                     }
-                    ManualInputCard(onClick = onManualInputClick)
                 }
-                Spacer(Modifier.height(61.px))
+                Spacer(Modifier.height(if (compact) 48.px else 61.px))
                 ViewAllButton(onClick = onViewAllClick)
             }
+
+            GuideButton(
+                onClick = onAppGuideClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 23.px, end = 101.px),
+            )
+            SettingsButton(
+                onClick = onSettingsClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 23.px, end = 23.px),
+            )
 
             pendingConfirm?.let { target ->
                 RequestConfirmDialog(target = target, onDismiss = onConfirmDismiss, onConfirm = onConfirmRequest)
@@ -188,6 +208,8 @@ fun PickupTargetSelectScreen(
     }
 }
 
+private const val COMPACT_CARD_SCALE = 0.85f
+
 /**
  * 선택한 대상자에게 위치를 요청할지 확인 (Figma 527:29080 "선택 프로필 픽업 확인 팝업", 880×520px).
  * 바깥을 누르면 닫힘
@@ -198,15 +220,16 @@ private fun RequestConfirmDialog(target: PickupTarget, onDismiss: () -> Unit, on
         val shape = RoundedCornerShape(34.px)
         Column(
             Modifier
-                .size(width = 880.px, height = 520.px)
+                .popupWidth(880)
+                .height(520.px)
                 .dropShadow(shape, Shadow(radius = 28.px, offset = DpOffset(0.px, 10.px), color = Color(0x24000000)))
                 .clip(shape)
                 .background(Color.White)
                 .consumeClicks()
-                .padding(top = 78.px),
+                .padding(start = 48.px, end = 48.px, top = 78.px),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(Modifier.size(width = 784.px, height = 56.px), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().height(56.px), contentAlignment = Alignment.Center) {
                 Text(
                     text = stringResource(R.string.pickup_targets_confirm_title),
                     style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 40f),
@@ -218,7 +241,9 @@ private fun RequestConfirmDialog(target: PickupTarget, onDismiss: () -> Unit, on
             val cardShape = RoundedCornerShape(20.px)
             Column(
                 Modifier
-                    .size(width = 744.px, height = 150.px)
+                    .widthIn(max = 744.px)
+                    .fillMaxWidth()
+                    .height(150.px)
                     .clip(cardShape)
                     .background(ConfirmCardBg)
                     .border(1.5.px, ConfirmCardBorder, cardShape)
@@ -240,30 +265,44 @@ private fun RequestConfirmDialog(target: PickupTarget, onDismiss: () -> Unit, on
                 )
             }
             Spacer(Modifier.height(34.px))
-            Row(horizontalArrangement = Arrangement.spacedBy(60.px)) {
+            // 버튼 342×100px 두 개 (좁은 창에서는 팝업 폭에 맞춰 줄어듦)
+            Row(
+                Modifier
+                    .widthIn(max = 744.px)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(if (isCompactLayout) 32.px else 60.px),
+            ) {
                 ConfirmButton(
                     text = stringResource(R.string.pickup_targets_confirm_cancel),
                     background = ConfirmCancelBg,
                     textColor = PickMeUpColors.TextPrimary,
                     onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
                 )
                 ConfirmButton(
                     text = stringResource(R.string.pickup_targets_confirm_request),
                     background = Purple,
                     textColor = Color.White,
                     onClick = onConfirm,
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
     }
 }
 
-/** 확인 팝업 버튼 342×100px */
+/** 확인 팝업 버튼 (100px 높이) */
 @Composable
-private fun ConfirmButton(text: String, background: Color, textColor: Color, onClick: () -> Unit) {
+private fun ConfirmButton(
+    text: String,
+    background: Color,
+    textColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        Modifier
-            .size(width = 342.px, height = 100.px)
+        modifier
+            .height(100.px)
             .clip(RoundedCornerShape(32.px))
             .background(background)
             .clickable(role = Role.Button, onClick = onClick),
@@ -441,6 +480,18 @@ private fun PickupTargetSelectEmptyPreview() = SelectPreview(targets = emptyList
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable
 private fun PickupTargetConfirmPreview() = SelectPreview(pendingConfirm = previewTargets[0])
+
+@Preview(name = "3분할 (Connect-S-17)", widthDp = 840, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetSelectCompactPreview() = SelectPreview()
+
+@Preview(name = "3분할 (Connect-L-12.9)", widthDp = 628, heightDp = 855, showBackground = true)
+@Composable
+private fun PickupTargetSelectSmallPreview() = SelectPreview()
+
+@Preview(name = "3분할 팝업", widthDp = 840, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetConfirmCompactPreview() = SelectPreview(pendingConfirm = previewTargets[0])
 
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable

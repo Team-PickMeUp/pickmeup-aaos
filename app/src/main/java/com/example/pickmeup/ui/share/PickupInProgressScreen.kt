@@ -90,7 +90,7 @@ fun PickupInProgressScreen(
                 message = message.takeIf { result == null },
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = NOTIFICATION_TOP.px),
+                    .padding(start = 64.px, end = 64.px, top = NOTIFICATION_TOP.px),
             )
             result?.let { PickupResultDialog(result = it, onConfirm = onResultConfirm) }
         },
@@ -147,6 +147,16 @@ private const val NOTIFICATION_SLIDE_MS = 300
 private fun PickupInProgressPreview() {
     PickupInProgressScreen(
         location = LocationShareResult.Allowed("홍길동", "00시 00구 00로", 0.0, 0.0),
+        onAppGuideClick = {}, onSettingsClick = {}, onCancelPickup = {}, onCompletePickup = {},
+    )
+}
+
+@Preview(name = "3분할 + 알림", widthDp = 840, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupInProgressCompactPreview() {
+    PickupInProgressScreen(
+        location = LocationShareResult.Allowed("홍길동", "서울특별시 강남구 테헤란로 123", 0.0, 0.0),
+        message = PickupMessage.GoingToPlace,
         onAppGuideClick = {}, onSettingsClick = {}, onCancelPickup = {}, onCompletePickup = {},
     )
 }

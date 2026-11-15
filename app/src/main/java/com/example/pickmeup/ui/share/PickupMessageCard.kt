@@ -3,10 +3,16 @@ package com.example.pickmeup.ui.share
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,60 +43,71 @@ private val FooterText = Color(0xD6FFFFFF)  // rgba(255,255,255,0.84)
 
 /**
  * 픽업 대상자 상황 알림 카드 (Figma 6-1-4-1~3 "픽업 대상자 상황 알림 / TTS 카드", 1310×342px).
- * 픽업 진행 중 화면 위쪽에 겹쳐 뜨는 비차단형 알림. 위치는 Figma 절대 좌표 그대로입니다.
+ * 픽업 진행 중 화면 위쪽에 겹쳐 뜨는 비차단형 알림.
+ *
+ * Figma 절대 좌표(배지 y 31, 문구 y 137, 구분선 y 263, 안내 y 280)를 세로 배치로 옮겨서,
+ * 창이 좁으면(화면 3분할) 카드 폭이 줄고 문구가 두 줄까지 늘어나도 겹치지 않습니다.
  */
 @Composable
 internal fun PickupMessageCard(message: PickupMessage, modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(36.px)
-    Box(
+    Column(
         modifier
-            .size(width = 1310.px, height = 342.px)
+            .widthIn(max = 1310.px)
+            .fillMaxWidth()
+            .heightIn(min = 342.px)
             .dropShadow(shape, Shadow(radius = 32.px, offset = DpOffset(0.px, 14.px), color = Color(0x38000000)))
             .clip(shape)
             .background(CardBg)
-            .border(3.px, Purple, shape),
+            .border(3.px, Purple, shape)
+            .padding(start = 36.px, end = 38.px, top = 31.px, bottom = 34.px),
     ) {
-        Badge(
-            text = stringResource(R.string.pickup_message_badge),
-            background = Purple,
-            fontSize = 24,
-            lineHeight = 28,
-            radius = 24,
-            modifier = Modifier
-                .offset(x = 36.px, y = 31.px)
-                .size(width = 226.px, height = 56.px),
-        )
-        Badge(
-            text = stringResource(R.string.pickup_message_tts_badge),
-            background = TtsBadgeBg,
-            fontSize = 20,
-            lineHeight = 24,
-            radius = 22,
-            modifier = Modifier
-                .offset(x = 1042.px, y = 36.px)
-                .size(width = 222.px, height = 47.px),
-        )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+            Badge(
+                text = stringResource(R.string.pickup_message_badge),
+                background = Purple,
+                fontSize = 24,
+                lineHeight = 28,
+                radius = 24,
+                modifier = Modifier.size(width = 226.px, height = 56.px),
+            )
+            Spacer(Modifier.weight(1f))
+            Badge(
+                text = stringResource(R.string.pickup_message_tts_badge),
+                background = TtsBadgeBg,
+                fontSize = 20,
+                lineHeight = 24,
+                radius = 22,
+                modifier = Modifier
+                    .padding(top = 5.px, end = 8.px)
+                    .size(width = 222.px, height = 47.px),
+            )
+        }
+        Spacer(Modifier.height(50.px))
         Text(
             text = stringResource(message.textRes),
             style = astaStyle(48.pxSp, FontWeight.Bold, Color.White, 64f / 48f),
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
-                .offset(x = 42.px, y = 137.px)
-                .width(1230.px),
+                .fillMaxWidth()
+                .padding(start = 6.px),
         )
+        Spacer(Modifier.height(62.px))
         Box(
             Modifier
-                .offset(x = 37.px, y = 263.px)
-                .size(width = 1235.px, height = 2.px)
+                .fillMaxWidth()
+                .padding(start = 1.px)
+                .height(2.px)
                 .background(Divider),
         )
+        Spacer(Modifier.height(15.px))
         Text(
             text = stringResource(R.string.pickup_message_footer),
             style = astaStyle(24.pxSp, FontWeight.Normal, FooterText, 28f / 24f),
             modifier = Modifier
-                .offset(x = 39.px, y = 280.px)
-                .width(1220.px),
+                .fillMaxWidth()
+                .padding(start = 3.px),
         )
     }
 }
@@ -116,6 +133,16 @@ private fun Badge(
             style = astaStyle(fontSize.pxSp, FontWeight.Bold, Color.White, lineHeight.toFloat() / fontSize),
             textAlign = TextAlign.Center,
         )
+    }
+}
+
+@Preview(name = "3분할", widthDp = 840, heightDp = 600, showBackground = true)
+@Composable
+private fun PickupMessageCardCompactPreview() {
+    ProvideDesignScale(Modifier.fillMaxSize()) {
+        Box(Modifier.fillMaxSize().padding(horizontal = 64.px), contentAlignment = Alignment.Center) {
+            PickupMessageCard(PickupMessage.Waiting)
+        }
     }
 }
 

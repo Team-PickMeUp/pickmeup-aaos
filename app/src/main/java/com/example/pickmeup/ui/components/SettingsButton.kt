@@ -46,6 +46,12 @@ fun GuideButton(
     )
 }
 
+/**
+ * 헤더 제목이 오른쪽 위 가이드·설정 버튼(end 23~161px)과 겹치지 않도록 남겨 둘 오른쪽 여백 (Figma px).
+ * 가이드 버튼 end 101 + 60 + 여유 19
+ */
+const val HEADER_ICONS_END_PX = 180
+
 /** 화면 오른쪽 위 아이콘 버튼: 60px 터치 영역 안에 48px 아이콘 (Figma 6px 여백) */
 @Composable
 private fun HeaderIconButton(

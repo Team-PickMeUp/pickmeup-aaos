@@ -43,6 +43,7 @@ import com.example.pickmeup.model.PickupTarget
 import com.example.pickmeup.ui.components.DimOverlay
 import com.example.pickmeup.ui.components.consumeClicks
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.popupWidth
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.location.PhoneNumber
@@ -77,7 +78,8 @@ internal fun ProfileEditDialog(
         val shape = RoundedCornerShape(32.px)
         Column(
             Modifier
-                .size(width = 960.px, height = 800.px)
+                .popupWidth(960)
+                .height(800.px)
                 .dropShadow(shape, Shadow(radius = 32.px, offset = DpOffset(0.px, 12.px), color = Color(0x1F000000)))
                 .clip(shape)
                 .background(Color.White)
@@ -122,13 +124,14 @@ internal fun ProfileEditDialog(
                     },
                 ),
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(24.px)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(24.px)) {
                 EditButton(
                     text = stringResource(R.string.profile_edit_cancel),
                     background = CancelBg,
                     textColor = PickMeUpColors.TextPrimary,
                     enabled = !state.isSaving,
                     onClick = onDismiss,
+                    modifier = Modifier.weight(1f),
                 )
                 EditButton(
                     text = stringResource(R.string.profile_edit_save),
@@ -139,6 +142,7 @@ internal fun ProfileEditDialog(
                         keyboard?.hide()
                         onSave()
                     },
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
@@ -188,12 +192,19 @@ private fun EditField(
     }
 }
 
-/** 하단 404×100px 버튼 */
+/** 하단 버튼 (Figma 404×100px, 팝업 폭을 반씩 나눠 씀) */
 @Composable
-private fun EditButton(text: String, background: Color, textColor: Color, enabled: Boolean, onClick: () -> Unit) {
+private fun EditButton(
+    text: String,
+    background: Color,
+    textColor: Color,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        Modifier
-            .size(width = 404.px, height = 100.px)
+        modifier
+            .height(100.px)
             .clip(RoundedCornerShape(32.px))
             .background(background)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick),

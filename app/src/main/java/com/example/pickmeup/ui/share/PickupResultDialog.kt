@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -32,6 +34,7 @@ import com.example.pickmeup.R
 import com.example.pickmeup.ui.components.DimOverlay
 import com.example.pickmeup.ui.components.consumeClicks
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.popupWidth
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
@@ -67,7 +70,8 @@ internal fun PickupResultDialog(result: PickupResult, onConfirm: () -> Unit) {
         val shape = RoundedCornerShape(36.px)
         Column(
             Modifier
-                .size(width = 750.px, height = 520.px)
+                .popupWidth(750)
+                .height(520.px)
                 .dropShadow(shape, Shadow(radius = 36.px, offset = DpOffset(0.px, 12.px), color = Color(0x38000000)))
                 .clip(shape)
                 .background(Color.White)
@@ -112,7 +116,10 @@ internal fun PickupResultDialog(result: PickupResult, onConfirm: () -> Unit) {
             Spacer(Modifier.height((57 + 11 - content.descriptionGap).px))
             Box(
                 Modifier
-                    .size(width = 540.px, height = 100.px)
+                    .padding(horizontal = 40.px)
+                    .widthIn(max = 540.px)
+                    .fillMaxWidth()
+                    .height(100.px)
                     .clip(RoundedCornerShape(32.px))
                     .background(Purple)
                     .clickable(role = Role.Button, onClick = onConfirm),

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +33,7 @@ import com.example.pickmeup.R
 import com.example.pickmeup.ui.components.GuideButton
 import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.isCompactLayout
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
@@ -46,7 +48,7 @@ private val SecondaryButtonBg = Color(0x0D131417) // rgba(19,20,23,0.05)
  * Figma: 경유지 / 도착지 설정(130:11560), 픽업 진행 중(261:15639)
  *
  * 내비게이션에 위치를 넘긴 뒤의 화면이라 헤더(뒤로 가기)가 없습니다.
- * 카드는 앱 영역 (64, 128) 에서 1572×1016px 입니다.
+ * 카드는 앱 영역 (64, 128) 에서 1572×1016px 이고, 창 높이가 다른 폼팩터에서는 아래 40px 을 남기고 남은 높이를 채웁니다.
  *
  * @param onAppGuideClick null 이면 가이드(책) 버튼 없음
  */
@@ -93,11 +95,14 @@ internal fun ShareScreenScaffold(
 }
 
 /**
- * 1016px 상태 카드: 제목 / 위치(가운데) / 안내 문구 / 버튼 2개.
- * 본문 684px 안에서 위치는 top 282.5px(가운데 - 59.5), 안내 문구는 top 604px(아래에서 80) — Figma 절대 위치 그대로.
+ * 상태 카드: 제목 / 위치(가운데) / 안내 문구 / 버튼 2개. [ShareScreenScaffold] 의 남은 높이를 채웁니다.
+ *
+ * Figma(1016px 카드, 본문 684px)에서 위치는 top 282.5px, 안내 문구는 본문 맨 아래입니다.
+ * 카드 높이·너비가 창에 따라 바뀌어도 겹치지 않도록 위치는 본문 가운데에서 19.5px 위, 안내 문구는 본문 아래에 붙입니다.
+ * 좁은 창(화면 3분할)에서는 긴 문구가 여러 줄로 나뉩니다.
  */
 @Composable
-internal fun LocationStatusCard(
+internal fun ColumnScope.LocationStatusCard(
     title: String,
     address: String,
     guide: String,
@@ -107,7 +112,8 @@ internal fun LocationStatusCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .height(1016.px)
+            .weight(1f)
+            .padding(bottom = 40.px)
             .clip(shape)
             .background(Color.White)
             .border(1.px, CardBorder, shape)
@@ -131,7 +137,8 @@ internal fun LocationStatusCard(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 282.5.px),
+                    .align(Alignment.Center)
+                    .offset(y = (-19.5).px),
             )
             Text(
                 text = guide,
@@ -139,7 +146,7 @@ internal fun LocationStatusCard(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 604.px),
+                    .align(Alignment.BottomCenter),
             )
         }
         Row(
@@ -169,7 +176,8 @@ internal fun CardButton(
             .clip(RoundedCornerShape(32.px))
             .background(if (primary) Purple else SecondaryButtonBg)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
-            .padding(horizontal = 24.px),
+            // 좁은 창에서는 버튼 폭이 300px 안팎이라 "경유지로 설정하기"가 들어가도록 좌우 여백을 줄임
+            .padding(horizontal = if (isCompactLayout) 8.px else 24.px),
         contentAlignment = Alignment.Center,
     ) {
         Text(

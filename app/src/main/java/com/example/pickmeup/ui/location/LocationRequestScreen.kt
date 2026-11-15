@@ -47,9 +47,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pickmeup.R
 import com.example.pickmeup.ui.components.GuideButton
+import com.example.pickmeup.ui.components.HEADER_ICONS_END_PX
 import com.example.pickmeup.ui.components.ScreenHeader
 import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.isCompactLayout
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
@@ -128,19 +130,23 @@ fun LocationRequestScreen(
             .fillMaxSize()
             .background(PickMeUpColors.BackgroundPrimary),
     ) {
+        // 좁은 창(화면 3분할)은 본문 좌우 여백 80 → 48px
+        val sidePadding = if (isCompactLayout) 48.px else 80.px
         Box(Modifier.fillMaxSize()) {
             Column(
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 80.px, end = 80.px, top = 48.px),
+                    .padding(start = sidePadding, end = sidePadding, top = 48.px),
                 verticalArrangement = Arrangement.spacedBy(48.px),
             ) {
                 // 헤더: Figma 는 x 64 (본문은 x 80) → 16px 왼쪽으로. 96px 높이라 안내 문구가 y 192 에 옴
                 ScreenHeader(
                     title = stringResource(R.string.location_request_title),
                     onBack = onBack,
-                    modifier = Modifier.offset(x = (-16).px),
+                    modifier = Modifier
+                        .offset(x = (-16).px)
+                        .padding(end = (HEADER_ICONS_END_PX - 64).px),
                 )
 
                 // 안내
@@ -231,6 +237,7 @@ fun LocationRequestScreen(
                     Text(
                         text = stringResource(R.string.location_request_privacy_notice),
                         style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
+                        modifier = Modifier.weight(1f, fill = false),
                     )
                 }
             }
@@ -372,6 +379,17 @@ private fun RequestLocationButton(enabled: Boolean, onClick: () -> Unit) {
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable
 private fun LocationRequestScreenPreview() {
+    LocationRequestScreen(
+        uiState = LocationRequestUiState(name = "홍길동", phoneDigits = "01012345678"),
+        onNameChange = {}, onPhoneChange = {}, onSaveForNextChange = {},
+        onRequestLocation = {}, onCancelRequest = {}, onDismissShareResult = {},
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {},
+    )
+}
+
+@Preview(name = "3분할", widthDp = 840, heightDp = 1184, showBackground = true)
+@Composable
+private fun LocationRequestCompactPreview() {
     LocationRequestScreen(
         uiState = LocationRequestUiState(name = "홍길동", phoneDigits = "01012345678"),
         onNameChange = {}, onPhoneChange = {}, onSaveForNextChange = {},
