@@ -3,6 +3,13 @@ package com.example.pickmeup.di
 import com.example.pickmeup.BuildConfig
 import com.example.pickmeup.data.message.FakePickupMessageRepository
 import com.example.pickmeup.data.message.PickupMessageRepository
+import com.example.pickmeup.data.navi.FakeNaviRepository
+import com.example.pickmeup.data.navi.NaviClient
+import com.example.pickmeup.data.navi.NaviHelperClient
+import com.example.pickmeup.data.navi.NaviRepository
+import com.example.pickmeup.data.navi.PleosNaviRepository
+import com.example.pickmeup.data.tts.PleosSpeechRepository
+import com.example.pickmeup.data.tts.SpeechRepository
 import com.example.pickmeup.data.pickup.FakePickupRepository
 import com.example.pickmeup.data.pickup.PickupRepository
 import com.example.pickmeup.data.pickup.RemotePickupRepository
@@ -32,6 +39,12 @@ abstract class RepositoryModule {
     @Binds
     abstract fun bindPickupMessageRepository(impl: FakePickupMessageRepository): PickupMessageRepository
 
+    @Binds
+    abstract fun bindNaviClient(impl: NaviHelperClient): NaviClient
+
+    @Binds
+    abstract fun bindSpeechRepository(impl: PleosSpeechRepository): SpeechRepository
+
     companion object {
         /** 서버 준비 전에는 가짜 저장소 사용 (app/build.gradle.kts 의 USE_FAKE_API 참고) */
         @Provides
@@ -40,5 +53,13 @@ abstract class RepositoryModule {
             fake: Provider<FakePickupRepository>,
             remote: Provider<RemotePickupRepository>,
         ): PickupRepository = if (BuildConfig.USE_FAKE_API) fake.get() else remote.get()
+
+        /** Pleos 내비 서비스가 없는 환경에서는 가짜 내비 (app/build.gradle.kts 의 USE_FAKE_NAVI 참고) */
+        @Provides
+        @Singleton
+        fun provideNaviRepository(
+            fake: Provider<FakeNaviRepository>,
+            pleos: Provider<PleosNaviRepository>,
+        ): NaviRepository = if (BuildConfig.USE_FAKE_NAVI) fake.get() else pleos.get()
     }
 }

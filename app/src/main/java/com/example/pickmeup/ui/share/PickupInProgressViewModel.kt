@@ -4,17 +4,23 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pickmeup.data.message.PickupMessageRepository
+import com.example.pickmeup.data.navi.NaviRepository
 import com.example.pickmeup.data.pickup.PickupRepository
+import com.example.pickmeup.data.tts.SpeechRepository
 import com.example.pickmeup.model.LocationShareResult
 import com.example.pickmeup.model.PickupMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 /** 픽업 종료 결과 → 결과 팝업 (Figma 8-1 취소 / 8-2 완료) */
 enum class PickupResult { Cancelled, Completed }
@@ -25,6 +31,8 @@ class PickupInProgressViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val pickupRepository: PickupRepository,
     messageRepository: PickupMessageRepository,
+    private val naviRepository: NaviRepository,
+    private val speechRepository: SpeechRepository,
 ) : ViewModel() {
 
     /**
@@ -44,14 +52,40 @@ class PickupInProgressViewModel @Inject constructor(
      */
     val result: StateFlow<PickupResult?> = savedStateHandle.getStateFlow(KEY_RESULT, null)
 
+    private val _message = MutableStateFlow<PickupMessage?>(null)
     /**
-     * 대상자가 보낸 가장 최근 상황 메시지 → 알림 카드. 없으면 null.
-     * TODO: TTS 발화, 발화 종료 5초 후 숨김, 같은 메시지 중복 억제 (Figma 9-6)
+     * 지금 보여줄 대상자 상황 알림. 알림이 뜰 때 같은 문구를 TTS 로 읽어주고 (Figma 9-6),
+     * **발화가 끝나면** 다시 null (최소 [MIN_NOTIFICATION_DURATION], TTS 를 못 쓰면 이 시간만 노출).
+     * 알림 사이에는 최소 [NOTIFICATION_GAP] 간격을 둡니다 (그 사이 도착한 메시지는 순서대로 대기).
      */
-    val message: StateFlow<PickupMessage?> = messageRepository.messages
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    val message: StateFlow<PickupMessage?> = _message.asStateFlow()
 
-    // TODO: 내비게이션 연동 시 경로에서 대상자 위치 제거
+    private val _arrived = MutableStateFlow(false)
+    /** 픽업 위치에 도착 → 카드 문구가 도착 안내로 바뀜 */
+    val arrived: StateFlow<Boolean> = _arrived.asStateFlow()
+
+    init {
+        // 화면 진입(= 내비 안내 시작) 시점부터 메시지·도착 시나리오 시작
+        viewModelScope.launch {
+            // buffer: 알림을 보여주거나 간격을 두는 동안 도착한 메시지는 버리지 않고 순서대로 보여줌
+            messageRepository.messages.buffer(Channel.UNLIMITED).collect { message ->
+                if (result.value != null) return@collect
+                _message.value = message
+                coroutineScope {
+                    val minimum = launch { delay(MIN_NOTIFICATION_DURATION) }
+                    speechRepository.speak(message.textRes) // 발화가 끝날 때까지 기다림
+                    minimum.join()
+                }
+                _message.value = null
+                delay(NOTIFICATION_GAP) // 다음 알림까지 쉬는 시간
+            }
+        }
+        viewModelScope.launch {
+            naviRepository.arrivals.first()
+            _arrived.value = true
+        }
+    }
+
     fun cancelPickup() = finish(PickupResult.Cancelled) { pickupRepository.cancelPickup() }
 
     fun completePickup() = finish(PickupResult.Completed) { pickupRepository.completePickup() }
@@ -61,13 +95,30 @@ class PickupInProgressViewModel @Inject constructor(
         _isProcessing.value = true
         viewModelScope.launch {
             action()
-                .onSuccess { savedStateHandle[KEY_RESULT] = result }
+                .onSuccess {
+                    // 픽업이 끝났으니 내비 안내 종료. 실패해도 픽업 종료는 진행 (운전자가 내비에서 직접 종료 가능)
+                    naviRepository.endGuidance()
+                    _message.value = null
+                    speechRepository.stop()
+                    savedStateHandle[KEY_RESULT] = result
+                }
                 .onFailure { /* TODO: 실패 안내 UI (Figma 미정) */ }
             _isProcessing.value = false
         }
     }
 
-    private companion object {
-        const val KEY_RESULT = "pickupResult"
+    override fun onCleared() {
+        // 화면을 벗어나면 읽던 안내 중단
+        speechRepository.stop()
+    }
+
+    companion object {
+        /** 알림 최소 노출 시간 (발화가 더 짧거나 TTS 를 쓸 수 없을 때) */
+        val MIN_NOTIFICATION_DURATION = 2.seconds
+
+        /** 알림이 올라간 뒤 다음 알림이 내려오기까지 최소 간격 */
+        val NOTIFICATION_GAP = 2.seconds
+
+        private const val KEY_RESULT = "pickupResult"
     }
 }

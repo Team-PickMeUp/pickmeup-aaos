@@ -12,7 +12,7 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * 서버 없이 화면을 확인하기 위한 가짜 저장소.
- * 위치 요청은 [responseDelay] 동안 기다린 뒤 '허용'되고([denyRequests] 면 '미허용'), 주소는 예시 값입니다.
+ * 위치 요청은 [responseDelay] 동안 기다린 뒤 '허용'되고([denyRequests] 면 '미허용'), 위치는 예시 값(실제 좌표)입니다.
  *
  * `local.properties` 에 `pickmeup.api.useFake=false` 를 넣으면 [RemotePickupRepository] 를 사용합니다.
  */
@@ -38,9 +38,10 @@ class FakePickupRepository internal constructor(
         if (denyRequests) return Result.success(LocationShareResult.Denied(targetName))
         val result = LocationShareResult.Allowed(
             targetName = targetName,
-            address = "00시 00구 00로",
-            latitude = 0.0,
-            longitude = 0.0,
+            // 실제 내비에 넘겨도 경로가 나오도록 실제 좌표 (Pleos NaviHelper 가이드 예제 위치)
+            address = "서울시 강남구 남부순환로 2621",
+            latitude = 37.48544722,
+            longitude = 127.03636666,
         )
         _currentShare.value = result
         return Result.success(result)

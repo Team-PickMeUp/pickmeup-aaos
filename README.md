@@ -51,6 +51,7 @@ app/src/main/java/com/example/pickmeup/
 │   ├── terms/               # 약관 동의 저장소 (SharedPreferences)
 │   ├── pickup/              # 픽업 저장소 (Fake / Remote)
 │   ├── target/              # 저장된 픽업 대상자 (SharedPreferences, 백업 제외)
+│   ├── navi/                # Pleos 내비 연동 (NaviHelper SDK / Fake)
 │   └── remote/              # Retrofit API, DTO
 └── ui/
     ├── design/              # Figma px → dp/sp 변환 (기준 너비 1700px)
@@ -118,6 +119,7 @@ app/src/main/java/com/example/pickmeup/
 |---|---|---|
 | `pickmeup.api.useFake` | `true` | `true`면 가짜 저장소 사용 (위치 요청이 항상 즉시 '허용') |
 | `pickmeup.api.baseUrl` | `http://10.0.2.2:8080/` | API 주소 (기본값: 에뮬레이터에서 본 PC의 `localhost:8080`) |
+| `pickmeup.navi.useFake` | `false` | `true`면 가짜 내비 사용 (Pleos 내비 서비스가 없는 일반 에뮬레이터용) |
 
 - http(비암호화) 접속은 debug 빌드에서 `10.0.2.2`, `localhost`만 허용
 

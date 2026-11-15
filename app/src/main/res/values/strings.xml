@@ -100,6 +100,9 @@
     <!-- 픽업 진행 중 (Figma 261:15639) -->
     <string name="pickup_progress_heading">픽업하러 가는 중이에요</string>
     <string name="pickup_progress_guide">도착하면 픽업 완료를 눌러주세요</string>
+    <!-- 픽업 위치 도착 (Figma 화면 없음 — 시연용 문구) -->
+    <string name="pickup_arrived_heading">픽업 위치에 도착했어요</string>
+    <string name="pickup_arrived_guide">픽업 대상자를 태운 뒤 픽업 완료를 눌러주세요</string>
     <string name="pickup_cancel">픽업 취소하기</string>
     <string name="pickup_complete">픽업 완료하기</string>
 
