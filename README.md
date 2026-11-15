@@ -148,7 +148,7 @@ adb shell am start --user 10 -n com.example.pickmeup/.MainActivity   # Pleos 앱
 | 네트워크 | Retrofit, OkHttp, kotlinx.serialization |
 | 차량 연동 | Pleos NaviHelper (내비), Pleos TextToSpeech (음성 안내) |
 | 플랫폼 | Android Automotive OS, minSdk 34 / targetSdk 37 |
-| 디자인 | [Figma](https://www.figma.com/design/ViO6HZxZ5M1Vc2ulAEdzDF), Asta Sans 폰트 |
+| 디자인 | Figma, Asta Sans 폰트 |
 
 라이브러리 버전: [`gradle/libs.versions.toml`](gradle/libs.versions.toml)
 
