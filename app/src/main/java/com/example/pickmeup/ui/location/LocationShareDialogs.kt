@@ -54,19 +54,26 @@ private val StatusCircle = Color(0x1AFF4C28) // #FF4C28 10%
  * - 대기 중: [LocationShareWaitingDialog] (뒤로 가기 = 요청 취소)
  * - 자동 취소 / 거부: [LocationShareEndedDialog] (뒤로 가기 = 확인)
  *
- * 위치 요청 화면과 픽업 불러오기 화면(Figma 2-1-4-1)에서 함께 씁니다.
+ * 위치 요청 화면, 픽업 불러오기 화면(Figma 2-1-4-1), 전체 프로필 보기 화면(Figma 2-1-5)에서 함께 씁니다.
+ *
+ * @param waitingTitle 대기 팝업 제목. 화면마다 Figma 문구가 달라서 고름
  */
 @Composable
 internal fun LocationShareRequestOverlay(
     state: LocationShareRequestState,
     onCancelRequest: () -> Unit,
     onDismissResult: () -> Unit,
+    waitingTitle: WaitingTitle = WaitingTitle.Short,
 ) {
     when (state) {
         LocationShareRequestState.Idle -> Unit
         is LocationShareRequestState.Waiting -> {
             BackHandler(onBack = onCancelRequest)
-            LocationShareWaitingDialog(remainingSeconds = state.remainingSeconds, onCancel = onCancelRequest)
+            LocationShareWaitingDialog(
+                remainingSeconds = state.remainingSeconds,
+                onCancel = onCancelRequest,
+                title = waitingTitle,
+            )
         }
         LocationShareRequestState.TimedOut -> {
             BackHandler(onBack = onDismissResult)
@@ -109,39 +116,63 @@ private fun SharePopup(content: @Composable () -> Unit) {
 }
 
 /**
- * 위치 공유 대기 팝업 (Figma 270:16766 "팝업 / 위치 공유 대기").
+ * 대기 팝업 제목. 팝업 크기·버튼은 같고, 제목 줄 수에 따라 아래 글자 간격만 다릅니다 (단위 px).
+ */
+internal enum class WaitingTitle(
+    @StringRes val text: Int,
+    val lineHeight: Float,
+    val top: Float,
+    val gapAfterTitle: Float,
+    val gapAfterDesc: Float,
+    val gapAfterNotice: Float,
+    val countdownTop: Float,
+    val gapBeforeButton: Float,
+) {
+    /** "위치 공유 대기중" 한 줄 — 위치 요청 화면 (Figma 270:16766, 4) */
+    Short(R.string.waiting_title, 40f, 61.5f, 62.5f, 65.5f, 38f, 21.5f, 29f),
+
+    /** "픽업 대상자의 위치 공유를 / 기다리고 있어요" 두 줄 — 픽업 불러오기 · 전체 프로필 보기 (Figma 2-1-4-1, 2-1-5) */
+    Long(R.string.waiting_title_long, 52f, 65f, 42.5f, 26.5f, 22.5f, 33f, 24.5f),
+}
+
+/**
+ * 위치 공유 대기 팝업 (Figma "팝업 / 위치 공유 대기", 560×629px).
  * 바깥을 눌러도 닫히지 않고, "요청 취소"(또는 뒤로 가기)로만 닫힙니다.
  * 5분이 지나면 [LocationShareRequester] 가 자동으로 취소합니다.
  */
 @Composable
-internal fun LocationShareWaitingDialog(remainingSeconds: Int, onCancel: () -> Unit) {
+internal fun LocationShareWaitingDialog(
+    remainingSeconds: Int,
+    onCancel: () -> Unit,
+    title: WaitingTitle = WaitingTitle.Short,
+) {
     SharePopup {
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(top = 61.5.px),
+                .padding(top = title.top.px),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(R.string.waiting_title),
-                style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 1f),
+                text = stringResource(title.text),
+                style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, title.lineHeight / 40f),
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(62.5.px))
+            Spacer(Modifier.height(title.gapAfterTitle.px))
             Text(
                 text = stringResource(R.string.waiting_desc),
                 style = astaStyle(24.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 28f / 24f),
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(65.5.px))
+            Spacer(Modifier.height(title.gapAfterDesc.px))
             Text(
                 text = stringResource(R.string.waiting_timeout_notice),
                 style = astaStyle(22.pxSp, FontWeight.Normal, CaptionGray, 29f / 22f),
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(38.px))
-            // Figma: "남은 시간" 아래로 카운트다운이 8.5px 겹쳐 있음
-            Box(Modifier.height(87.5.px), contentAlignment = Alignment.TopCenter) {
+            Spacer(Modifier.height(title.gapAfterNotice.px))
+            // Figma: "남은 시간" 캡션 아래로 카운트다운이 살짝 겹쳐 있음
+            Box(Modifier.height((title.countdownTop + 66f).px), contentAlignment = Alignment.TopCenter) {
                 Text(
                     text = stringResource(R.string.waiting_remaining_label),
                     style = astaStyle(21.pxSp, FontWeight.Normal, CaptionGray, 28f / 21f),
@@ -158,11 +189,11 @@ internal fun LocationShareWaitingDialog(remainingSeconds: Int, onCancel: () -> U
                     style = astaStyle(48.pxSp, FontWeight.Bold, CountdownPurple, 64f / 48f),
                     textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .padding(top = 21.5.px)
+                        .padding(top = title.countdownTop.px)
                         .semantics { contentDescription = timeDescription },
                 )
             }
-            Spacer(Modifier.height(29.px))
+            Spacer(Modifier.height(title.gapBeforeButton.px))
             PopupButton(
                 text = stringResource(R.string.waiting_cancel),
                 background = CancelRed,
@@ -280,5 +311,13 @@ private fun TimedOutDialogPreview() {
 private fun DeniedDialogPreview() {
     ProvideDesignScale(Modifier.fillMaxSize()) {
         LocationShareRequestOverlay(LocationShareRequestState.Denied, onCancelRequest = {}, onDismissResult = {})
+    }
+}
+
+@Preview(name = "대기 (2-1-4-1 · 2-1-5)", widthDp = 1700, heightDp = 1184, showBackground = true)
+@Composable
+private fun WaitingDialogLongTitlePreview() {
+    ProvideDesignScale(Modifier.fillMaxSize()) {
+        LocationShareWaitingDialog(remainingSeconds = 300, onCancel = {}, title = WaitingTitle.Long)
     }
 }

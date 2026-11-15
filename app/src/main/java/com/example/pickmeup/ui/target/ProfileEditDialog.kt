@@ -62,8 +62,9 @@ private val FieldBg = Color(0xFFFAFAFC)
 private val FieldBorder = Color(0xFFD9DBE3)
 
 /**
- * 픽업 대상자 프로필 수정 팝업 (Figma 507:28042 "프로필 정보 수정 팝업", 960×800px).
- * - 저장된 이름·전화번호가 채워진 채로 열림
+ * 픽업 대상자 프로필 추가 · 수정 팝업 (960×800px).
+ * - 수정 (Figma 507:28042 "2-1-3"): 저장된 이름·전화번호가 채워진 채로 열림
+ * - 추가 (Figma 916:32180 "2-1-1-1"): 같은 틀에 제목·안내만 다르고, 빈 입력란에는 안내 문구 표시
  * - 이름이 비었거나 전화번호가 휴대전화 형식이 아니면 "저장하기" 비활성
  * - 입력 중인 값을 잃지 않도록 바깥을 눌러도 닫히지 않음 ("취소" 또는 뒤로 가기로 닫기)
  */
@@ -101,18 +102,19 @@ internal fun ProfileEditDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = stringResource(R.string.profile_edit_title),
+                    text = stringResource(if (state.isNew) R.string.profile_add_title else R.string.profile_edit_title),
                     style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 40f),
                     textAlign = TextAlign.Center,
                 )
                 Text(
-                    text = stringResource(R.string.profile_edit_desc),
+                    text = stringResource(if (state.isNew) R.string.profile_add_desc else R.string.profile_edit_desc),
                     style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextStrong, 34f / 26f),
                     textAlign = TextAlign.Center,
                 )
             }
             EditField(
                 label = stringResource(R.string.location_request_name_label),
+                placeholder = stringResource(R.string.location_request_name_hint),
                 value = nameField,
                 onValueChange = {
                     nameField = it
@@ -123,6 +125,7 @@ internal fun ProfileEditDialog(
             )
             EditField(
                 label = stringResource(R.string.location_request_phone_label),
+                placeholder = stringResource(R.string.location_request_phone_hint),
                 // 전화번호는 숫자만 받아 하이픈을 자동으로 넣으므로 커서는 항상 끝 (조합 입력 없음)
                 value = PhoneNumber.format(state.phoneDigits).let { TextFieldValue(it, TextRange(it.length)) },
                 onValueChange = { onPhoneChange(it.text) },
@@ -163,6 +166,7 @@ internal fun ProfileEditDialog(
 @Composable
 private fun EditField(
     label: String,
+    placeholder: String,
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     keyboardOptions: KeyboardOptions,
@@ -194,6 +198,13 @@ private fun EditField(
                         .padding(horizontal = 28.px),
                     contentAlignment = Alignment.CenterStart,
                 ) {
+                    if (value.text.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = astaStyle(30.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 38f / 30f),
+                            maxLines = 1,
+                        )
+                    }
                     innerTextField()
                 }
             },
@@ -237,6 +248,17 @@ private fun ProfileEditDialogPreview() {
                 name = "김민수",
                 phoneDigits = "01012345678",
             ),
+            onNameChange = {}, onPhoneChange = {}, onDismiss = {}, onSave = {},
+        )
+    }
+}
+
+@Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
+@Composable
+private fun ProfileAddDialogPreview() {
+    ProvideDesignScale(Modifier.fillMaxSize()) {
+        ProfileEditDialog(
+            state = ProfileEditState(target = null, name = "", phoneDigits = ""),
             onNameChange = {}, onPhoneChange = {}, onDismiss = {}, onSave = {},
         )
     }

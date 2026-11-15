@@ -16,8 +16,9 @@ data class TermsDetailDestination(val type: TermsType)
 
 /**
  * 위치 요청 — "새 픽업 대상자 입력".
- * 전체 프로필 목록에서 대상자를 골라서 들어오면 이름·전화번호가 채워진 상태로 시작
- * (인자 이름이 LocationRequestViewModel 의 SavedStateHandle 키와 같아서 자동으로 들어감)
+ * 이름·전화번호를 넘기면 채워진 상태로 시작
+ * (인자 이름이 LocationRequestViewModel 의 SavedStateHandle 키와 같아서 자동으로 들어감).
+ * 지금은 픽업 불러오기의 "새 픽업 대상자 입력"에서 빈 값으로만 열림 (전체 프로필 보기는 팝업으로 바로 요청)
  */
 @Serializable
 data class LocationRequestDestination(

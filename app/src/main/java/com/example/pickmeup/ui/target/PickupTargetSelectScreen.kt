@@ -59,6 +59,7 @@ import com.example.pickmeup.ui.location.LocationShareEvent
 import com.example.pickmeup.ui.location.LocationShareRequestOverlay
 import com.example.pickmeup.ui.location.LocationShareRequestState
 import com.example.pickmeup.ui.location.PhoneNumber
+import com.example.pickmeup.ui.location.WaitingTitle
 import com.example.pickmeup.ui.theme.PickMeUpColors
 import com.example.pickmeup.ui.theme.astaStyle
 
@@ -71,9 +72,6 @@ private val ManualCardBorder = Color(0xFFDCD7EF)
 private val PlusCircle = Color(0xFFEAE6FF)
 private val ViewAllBg = Color(0xFFEEEAFE)
 private val ViewAllBorder = Color(0xFFD6CFFF)
-private val ConfirmCardBg = Color(0xFFF7F7FC)
-private val ConfirmCardBorder = Color(0xFFDFDEEA)
-private val ConfirmCancelBg = Color(0xFFF0F0F5)
 
 @Composable
 fun PickupTargetSelectRoute(
@@ -203,118 +201,13 @@ fun PickupTargetSelectScreen(
                 state = shareState,
                 onCancelRequest = onCancelRequest,
                 onDismissResult = onDismissShareResult,
+                waitingTitle = WaitingTitle.Long,
             )
         }
     }
 }
 
 private const val COMPACT_CARD_SCALE = 0.85f
-
-/**
- * 선택한 대상자에게 위치를 요청할지 확인 (Figma 527:29080 "선택 프로필 픽업 확인 팝업", 880×520px).
- * 바깥을 누르면 닫힘
- */
-@Composable
-private fun RequestConfirmDialog(target: PickupTarget, onDismiss: () -> Unit, onConfirm: () -> Unit) {
-    DimOverlay(onOutsideClick = onDismiss) {
-        val shape = RoundedCornerShape(34.px)
-        Column(
-            Modifier
-                .popupWidth(880)
-                .height(520.px)
-                .dropShadow(shape, Shadow(radius = 28.px, offset = DpOffset(0.px, 10.px), color = Color(0x24000000)))
-                .clip(shape)
-                .background(Color.White)
-                .consumeClicks()
-                .padding(start = 48.px, end = 48.px, top = 78.px),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(Modifier.fillMaxWidth().height(56.px), contentAlignment = Alignment.Center) {
-                Text(
-                    text = stringResource(R.string.pickup_targets_confirm_title),
-                    style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 40f),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                )
-            }
-            Spacer(Modifier.height(56.px))
-            val cardShape = RoundedCornerShape(20.px)
-            Column(
-                Modifier
-                    .widthIn(max = 744.px)
-                    .fillMaxWidth()
-                    .height(150.px)
-                    .clip(cardShape)
-                    .background(ConfirmCardBg)
-                    .border(1.5.px, ConfirmCardBorder, cardShape)
-                    .padding(horizontal = 52.px),
-                verticalArrangement = Arrangement.spacedBy(11.px, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = target.name,
-                    style = astaStyle(36.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 44f / 36f),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = PhoneNumber.format(target.phoneDigits),
-                    style = astaStyle(26.pxSp, FontWeight.Normal, PickMeUpColors.TextMuted, 34f / 26f),
-                    textAlign = TextAlign.Center,
-                )
-            }
-            Spacer(Modifier.height(34.px))
-            // 버튼 342×100px 두 개 (좁은 창에서는 팝업 폭에 맞춰 줄어듦)
-            Row(
-                Modifier
-                    .widthIn(max = 744.px)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(if (isCompactLayout) 32.px else 60.px),
-            ) {
-                ConfirmButton(
-                    text = stringResource(R.string.pickup_targets_confirm_cancel),
-                    background = ConfirmCancelBg,
-                    textColor = PickMeUpColors.TextPrimary,
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f),
-                )
-                ConfirmButton(
-                    text = stringResource(R.string.pickup_targets_confirm_request),
-                    background = Purple,
-                    textColor = Color.White,
-                    onClick = onConfirm,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
-    }
-}
-
-/** 확인 팝업 버튼 (100px 높이) */
-@Composable
-private fun ConfirmButton(
-    text: String,
-    background: Color,
-    textColor: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier
-            .height(100.px)
-            .clip(RoundedCornerShape(32.px))
-            .background(background)
-            .clickable(role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = text,
-            style = astaStyle(32.pxSp, FontWeight.Bold, textColor, 40f / 32f),
-            textAlign = TextAlign.Center,
-        )
-    }
-}
 
 /** 315×399px 카드 틀: 아래쪽에 이름(32px) / 보조 문구(20px, 없으면 생략) */
 @Composable
