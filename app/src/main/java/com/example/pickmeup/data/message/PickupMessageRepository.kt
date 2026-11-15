@@ -21,22 +21,34 @@ interface PickupMessageRepository {
 }
 
 /**
- * 화면 확인용 가짜 메시지: [interval] 마다 가는 중 → 거의 도착 → 대기 중을 계속 반복합니다.
+ * 시연용 가짜 메시지: 구독을 시작한 때(= 내비 안내 시작 후 픽업 진행 중 화면 진입)부터
+ * [schedule] 의 시각에 메시지를 한 번씩만 보냅니다. 반복하지 않습니다.
+ *
+ * 기본 시나리오: 5초 가는 중 → 10초 거의 도착 → 15초 대기 중 (20초에 도착: NaviRepository.arrivals)
  */
 @Singleton
 class FakePickupMessageRepository internal constructor(
-    private val interval: Duration,
+    /** 구독 시작 기준 시각 → 메시지 (시각 순) */
+    private val schedule: List<Pair<Duration, PickupMessage>>,
 ) : PickupMessageRepository {
 
     @Inject
-    constructor() : this(interval = 2.seconds)
+    constructor() : this(DEMO_SCHEDULE)
 
     override val messages: Flow<PickupMessage> = flow {
-        while (true) {
-            PickupMessage.entries.forEach { message ->
-                emit(message)
-                delay(interval)
-            }
+        var elapsed = Duration.ZERO
+        schedule.forEach { (at, message) ->
+            delay(at - elapsed)
+            elapsed = at
+            emit(message)
         }
+    }
+
+    companion object {
+        val DEMO_SCHEDULE = listOf(
+            5.seconds to PickupMessage.GoingToPlace,
+            10.seconds to PickupMessage.AlmostArrived,
+            15.seconds to PickupMessage.Waiting,
+        )
     }
 }

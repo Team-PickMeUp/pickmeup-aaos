@@ -1,6 +1,5 @@
 package com.example.pickmeup.ui.share
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -35,13 +34,6 @@ private val Purple = Color(0xFF5A46FA)
 private val TtsBadgeBg = Color(0xFF383347)
 private val Divider = Color(0xFF555064)
 private val FooterText = Color(0xD6FFFFFF)  // rgba(255,255,255,0.84)
-
-@StringRes
-private fun PickupMessage.textRes(): Int = when (this) {
-    PickupMessage.GoingToPlace -> R.string.pickup_message_going
-    PickupMessage.AlmostArrived -> R.string.pickup_message_almost
-    PickupMessage.Waiting -> R.string.pickup_message_waiting
-}
 
 /**
  * 픽업 대상자 상황 알림 카드 (Figma 6-1-4-1~3 "픽업 대상자 상황 알림 / TTS 카드", 1310×342px).
@@ -79,7 +71,7 @@ internal fun PickupMessageCard(message: PickupMessage, modifier: Modifier = Modi
                 .size(width = 222.px, height = 47.px),
         )
         Text(
-            text = stringResource(message.textRes()),
+            text = stringResource(message.textRes),
             style = astaStyle(48.pxSp, FontWeight.Bold, Color.White, 64f / 48f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

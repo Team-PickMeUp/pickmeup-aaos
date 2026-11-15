@@ -17,6 +17,7 @@ coroutines = "1.11.0"
 retrofit = "3.0.0"
 okhttp = "5.5.1"
 naviHelper = "3.0.5"
+textToSpeech = "3.3.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -50,6 +51,7 @@ okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-i
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 # Pleos
 pleos-navi-helper = { group = "ai.pleos.playground", name = "NaviHelper", version.ref = "naviHelper" }
+pleos-text-to-speech = { group = "ai.pleos.playground", name = "TextToSpeech", version.ref = "textToSpeech" }
 # Test
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 

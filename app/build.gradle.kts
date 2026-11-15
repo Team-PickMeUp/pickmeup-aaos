@@ -18,6 +18,10 @@ val apiBaseUrl = localProps.getProperty("pickmeup.api.baseUrl") ?: "http://10.0.
 val useFakeApi = localProps.getProperty("pickmeup.api.useFake")?.toBoolean() ?: true
 // Pleos 내비 서비스가 없는 환경(일반 에뮬레이터 등)에서는 `pickmeup.navi.useFake=true` 로 가짜 내비를 사용합니다.
 val useFakeNavi = localProps.getProperty("pickmeup.navi.useFake")?.toBoolean() ?: false
+// Pleos TextToSpeech: Pleos Playground My Project 의 Client ID/Secret (git 에 올리지 않음).
+// 둘 다 있으면 HYBRID 모드(서버 TTS + 실패 시 온디바이스), 없으면 등록이 필요 없는 ON_DEVICE 모드
+val ttsClientId = localProps.getProperty("pickmeup.tts.clientId").orEmpty()
+val ttsClientSecret = localProps.getProperty("pickmeup.tts.clientSecret").orEmpty()
 
 android {
     namespace = "com.example.pickmeup"
@@ -37,6 +41,8 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         buildConfigField("boolean", "USE_FAKE_API", "$useFakeApi")
         buildConfigField("boolean", "USE_FAKE_NAVI", "$useFakeNavi")
+        buildConfigField("String", "TTS_CLIENT_ID", "\"$ttsClientId\"")
+        buildConfigField("String", "TTS_CLIENT_SECRET", "\"$ttsClientSecret\"")
     }
 
     buildTypes {
@@ -80,6 +86,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.pleos.navi.helper)
+    implementation(libs.pleos.text.to.speech)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
