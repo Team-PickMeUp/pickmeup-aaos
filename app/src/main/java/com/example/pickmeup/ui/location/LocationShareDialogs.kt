@@ -37,6 +37,7 @@ import com.example.pickmeup.R
 import com.example.pickmeup.ui.components.DimOverlay
 import com.example.pickmeup.ui.components.consumeClicks
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.popupWidth
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
@@ -95,7 +96,8 @@ private fun SharePopup(content: @Composable () -> Unit) {
         val shape = RoundedCornerShape(36.px)
         Box(
             Modifier
-                .size(width = 560.px, height = 629.px)
+                .popupWidth(560)
+                .height(629.px)
                 .dropShadow(shape, Shadow(radius = 40.px, offset = DpOffset(0.px, 20.px), color = Color(0x33000000)))
                 .clip(shape)
                 .background(Color.White)

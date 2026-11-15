@@ -17,11 +17,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +45,7 @@ import androidx.compose.ui.unit.DpOffset
 import com.example.pickmeup.R
 import com.example.pickmeup.ui.components.ScreenHeader
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.isCompactLayout
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
@@ -128,7 +132,10 @@ fun AppGuideScreen(
 
 // ───────────────────────── 슬라이드 ─────────────────────────
 
-/** 이미지 영역(640px) + 간격 40px + 안내 텍스트 영역 */
+/**
+ * 이미지 영역(640px) + 간격 40px + 안내 텍스트 영역.
+ * 좁은 창(화면 3분할)에서는 안내 텍스트를 위, 그림을 아래로 쌓고 세로로 스크롤합니다.
+ */
 @Composable
 private fun SlideLayout(
     image: @Composable ColumnScope.() -> Unit,
@@ -136,6 +143,31 @@ private fun SlideLayout(
     textTopPadding: Int? = null,
     textGap: Int = 28,
 ) {
+    if (isCompactLayout) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 32.px),
+            verticalArrangement = Arrangement.spacedBy(48.px),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Column(
+                Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(textGap.px),
+                content = text,
+            )
+            Column(
+                Modifier
+                    .widthIn(max = 640.px)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.px),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                content = image,
+            )
+        }
+        return
+    }
     Row(
         Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(40.px),
@@ -170,8 +202,8 @@ private fun SlideLayout(
 private fun Step1Slide() {
     SlideLayout(
         image = {
-            // Figma "가이드 이미지 컨테이너"는 비어 있는 자리(94.4px)라 공간만 유지
-            Spacer(Modifier.height(94.395.px))
+            // Figma "가이드 이미지 컨테이너"는 비어 있는 자리(94.4px)라 공간만 유지 (세로로 쌓을 때는 생략)
+            if (!isCompactLayout) Spacer(Modifier.height(94.395.px))
             MockNewTargetCard()
         },
         text = {
@@ -230,7 +262,7 @@ private fun Step2Slide() {
             // 문자메시지 예시 말풍선
             Box(
                 Modifier
-                    .width(640.px)
+                    .fillMaxWidth()
                     .dropShadow(
                         RoundedCornerShape(16.px),
                         Shadow(radius = 12.px, offset = DpOffset(0.px, 6.px), color = Color(0x14000000)),
@@ -264,7 +296,7 @@ private fun Step2Slide() {
 private fun Step3Slide() {
     SlideLayout(
         image = {
-            Spacer(Modifier.height(94.395.px))
+            if (!isCompactLayout) Spacer(Modifier.height(94.395.px))
             MockAllowedCard()
         },
         text = {
@@ -461,5 +493,11 @@ private fun MockPurpleButton(@StringRes text: Int, modifier: Modifier) {
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable
 private fun AppGuideScreenPreview() {
+    AppGuideScreen(onBack = {})
+}
+
+@Preview(name = "3분할", widthDp = 840, heightDp = 1184, showBackground = true)
+@Composable
+private fun AppGuideScreenCompactPreview() {
     AppGuideScreen(onBack = {})
 }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -41,10 +42,13 @@ import com.example.pickmeup.R
 import com.example.pickmeup.model.PickupTarget
 import com.example.pickmeup.ui.components.DimOverlay
 import com.example.pickmeup.ui.components.GuideButton
+import com.example.pickmeup.ui.components.HEADER_ICONS_END_PX
 import com.example.pickmeup.ui.components.SettingsButton
 import com.example.pickmeup.ui.components.ScreenHeader
 import com.example.pickmeup.ui.components.consumeClicks
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.isCompactLayout
+import com.example.pickmeup.ui.design.popupWidth
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.location.PhoneNumber
@@ -124,7 +128,7 @@ fun PickupTargetManageScreen(
             ScreenHeader(
                 title = stringResource(R.string.pickup_targets_manage_header),
                 onBack = onBack,
-                modifier = Modifier.padding(start = 64.px, end = 64.px, top = 48.px),
+                modifier = Modifier.padding(start = 64.px, end = HEADER_ICONS_END_PX.px, top = 48.px),
             )
             GuideButton(
                 onClick = onAppGuideClick,
@@ -139,10 +143,11 @@ fun PickupTargetManageScreen(
                     .padding(top = 23.px, end = 23.px),
             )
 
+            val compact = isCompactLayout
             Column(
                 Modifier
                     .fillMaxSize()
-                    .padding(top = 183.px),
+                    .padding(start = 64.px, end = 64.px, top = 183.px),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -150,12 +155,14 @@ fun PickupTargetManageScreen(
                     style = astaStyle(56.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 72f / 56f),
                     textAlign = TextAlign.Center,
                 )
-                Spacer(Modifier.height(134.px))
+                Spacer(Modifier.height(if (compact) 72.px else 134.px))
                 if (uiState.targets.isEmpty()) {
                     EmptyNotice()
                 } else {
                     LazyColumn(
-                        Modifier.width(1330.px),
+                        Modifier
+                            .widthIn(max = 1330.px)
+                            .fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(23.px),
                         contentPadding = PaddingValues(bottom = 48.px),
                     ) {
@@ -193,7 +200,10 @@ fun PickupTargetManageScreen(
     }
 }
 
-/** 대상자 한 줄 (Figma "전체 프로필 / 이름", 1330×137px) */
+/**
+ * 대상자 한 줄 (Figma "전체 프로필 / 이름", 1330×137px).
+ * 좁은 창(화면 3분할)에서는 이름 칸이 남도록 수정·삭제 버튼을 190 → 120px 로 줄임
+ */
 @Composable
 private fun TargetRow(
     target: PickupTarget,
@@ -203,6 +213,8 @@ private fun TargetRow(
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(22.px)
+    val compact = isCompactLayout
+    val buttonWidth = if (compact) 120.px else 190.px
     Row(
         modifier
             .fillMaxWidth()
@@ -211,7 +223,7 @@ private fun TargetRow(
             .background(Color.White)
             .border(2.px, RowBorder, shape)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(start = 34.px, end = 54.px),
+            .padding(start = 34.px, end = if (compact) 34.px else 54.px),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -254,11 +266,11 @@ private fun TargetRow(
             lineHeight = 36,
             onClick = onEditClick,
             modifier = Modifier
-                .size(width = 190.px, height = 69.px)
+                .size(width = buttonWidth, height = 69.px)
                 .border(1.px, EditBorder, RoundedCornerShape(16.px)),
             cornerRadius = 16,
         )
-        Spacer(Modifier.width(24.px))
+        Spacer(Modifier.width(if (compact) 16.px else 24.px))
         PopupButton(
             text = stringResource(R.string.pickup_targets_manage_delete),
             background = DeleteRed,
@@ -266,7 +278,7 @@ private fun TargetRow(
             fontSize = 28,
             lineHeight = 36,
             onClick = onDeleteClick,
-            modifier = Modifier.size(width = 190.px, height = 69.px),
+            modifier = Modifier.size(width = buttonWidth, height = 69.px),
             cornerRadius = 16,
         )
     }
@@ -277,7 +289,9 @@ private fun TargetRow(
 private fun EmptyNotice() {
     Column(
         Modifier
-            .size(width = 1330.px, height = 458.px)
+            .widthIn(max = 1330.px)
+            .fillMaxWidth()
+            .height(458.px)
             .clip(RoundedCornerShape(24.px))
             .background(EmptyBg)
             .padding(top = 174.px),
@@ -311,11 +325,12 @@ private fun DeleteConfirmDialog(
     DimOverlay(dimColor = Dim, onOutsideClick = onDismiss) {
         Column(
             Modifier
-                .size(width = 806.px, height = 469.px)
+                .popupWidth(806)
+                .height(469.px)
                 .clip(RoundedCornerShape(34.px))
                 .background(Color.White)
                 .consumeClicks()
-                .padding(top = 50.px),
+                .padding(start = 40.px, end = 40.px, top = 50.px),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -344,14 +359,22 @@ private fun DeleteConfirmDialog(
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(41.px))
-            Row(horizontalArrangement = Arrangement.spacedBy(51.px)) {
+            // 버튼 320×75px 두 개 (좁은 창에서는 팝업 폭에 맞춰 줄어듦)
+            Row(
+                Modifier
+                    .widthIn(max = 691.px)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(if (isCompactLayout) 32.px else 51.px),
+            ) {
                 PopupButton(
                     text = stringResource(R.string.pickup_targets_delete_cancel),
                     background = CancelBg,
                     textColor = PickMeUpColors.TextPrimary,
                     onClick = onDismiss,
                     enabled = enabled,
-                    modifier = Modifier.size(width = 320.px, height = 75.px),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(75.px),
                 )
                 PopupButton(
                     text = stringResource(R.string.pickup_targets_delete_confirm),
@@ -359,7 +382,9 @@ private fun DeleteConfirmDialog(
                     textColor = Color.White,
                     onClick = onConfirm,
                     enabled = enabled,
-                    modifier = Modifier.size(width = 320.px, height = 75.px),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(75.px),
                 )
             }
         }
@@ -402,6 +427,17 @@ private val previewTargets = listOf(
 @Preview(widthDp = 1700, heightDp = 1184, showBackground = true)
 @Composable
 private fun PickupTargetManagePreview() {
+    PickupTargetManageScreen(
+        uiState = PickupTargetManageUiState(targets = previewTargets),
+        onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},
+        onDeleteClick = {}, onDeleteDismiss = {}, onDeleteConfirm = {},
+        onEditClick = {}, onEditNameChange = {}, onEditPhoneChange = {}, onEditDismiss = {}, onEditSave = {},
+    )
+}
+
+@Preview(name = "3분할", widthDp = 840, heightDp = 1184, showBackground = true)
+@Composable
+private fun PickupTargetManageCompactPreview() {
     PickupTargetManageScreen(
         uiState = PickupTargetManageUiState(targets = previewTargets),
         onBack = {}, onAppGuideClick = {}, onSettingsClick = {}, onTargetSelected = {},

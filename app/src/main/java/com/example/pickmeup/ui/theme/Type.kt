@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.example.pickmeup.R
@@ -58,7 +59,14 @@ fun astaStyle(
     fontSize = size,
     color = color,
     lineHeight = if (lineHeightMultiplier != null) size * lineHeightMultiplier else TextUnit.Unspecified,
+    lineBreak = KoreanLineBreak,
 )
+
+/**
+ * 한국어 문장이 단어 중간("주/세요")에서 끊기지 않도록 구문(어절) 단위로 줄바꿈 (Android 13+).
+ * 좁은 창(화면 3분할)에서 긴 안내 문구가 여러 줄로 나뉠 때 필요합니다.
+ */
+private val KoreanLineBreak = LineBreak.Paragraph.copy(wordBreak = LineBreak.WordBreak.Phrase)
 
 /** 스타일을 지정하지 않은 Material 텍스트의 기본값 */
 internal val Typography = Typography(

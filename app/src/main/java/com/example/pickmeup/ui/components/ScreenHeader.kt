@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import com.example.pickmeup.R
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
@@ -53,9 +54,13 @@ fun ScreenHeader(
                 modifier = Modifier.size(48.px),
             )
         }
+        // 좁은 창에서 오른쪽 위 아이콘과 겹치지 않도록 한 줄 + 말줄임 (호출부에서 end 여백 지정)
         Text(
             text = title,
             style = astaStyle(40.pxSp, FontWeight.Bold, PickMeUpColors.TextPrimary, 52f / 40f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
         )
     }
 }

@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.pickmeup.R
 import com.example.pickmeup.ui.components.ScreenHeader
 import com.example.pickmeup.ui.design.ProvideDesignScale
+import com.example.pickmeup.ui.design.isCompactLayout
 import com.example.pickmeup.ui.design.px
 import com.example.pickmeup.ui.design.pxSp
 import com.example.pickmeup.ui.theme.PickMeUpColors
@@ -64,6 +65,8 @@ fun SettingsScreen(
             .fillMaxSize()
             .background(PickMeUpColors.BackgroundPrimary),
     ) {
+        // 본문 안쪽 여백: 좁은 창(화면 3분할)에서는 76 → 16px
+        val contentInset = if (isCompactLayout) 16.px else 76.px
         Column(
             Modifier
                 .fillMaxSize()
@@ -77,7 +80,7 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 76.px, end = 76.px, top = 72.px, bottom = 64.px),
+                    .padding(start = contentInset, end = contentInset, top = 72.px, bottom = 64.px),
                 verticalArrangement = Arrangement.spacedBy(48.px),
             ) {
                 Text(
